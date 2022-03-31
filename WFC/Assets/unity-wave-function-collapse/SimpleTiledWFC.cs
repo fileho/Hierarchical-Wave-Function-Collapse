@@ -57,13 +57,14 @@ public class SimpleTiledWFC : BaseWFC{
     {
         width = w;
         depth = h;
+        this.fill = fill;
 
-		RunPreplacing(fill);
+		RunPreplacing();
     }
 
-    private void RunPreplacing(bool[,] fill)
+    private void RunPreplacing()
     {
-        preplacement.Run(this, fill);
+        preplacement.Run(this);
     }
 
     public void OnDrawGizmos(){

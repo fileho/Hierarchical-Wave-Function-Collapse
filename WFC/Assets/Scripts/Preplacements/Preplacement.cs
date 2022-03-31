@@ -5,17 +5,17 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "SO/Preplacements/None")]
 public class Preplacement : ScriptableObject
 {
-    public virtual void Run(OverlapWFC wfc, bool[,] fill) { wfc.predetermined = new List<Predetermined>(); }
+    public virtual void Run(OverlapWFC wfc) { wfc.predetermined = new List<Predetermined>(); }
 
-    public virtual void Run(SimpleTiledWFC wfc, bool[,] fill) { wfc.predetermined = new List<Predetermined>(); }
+    public virtual void Run(SimpleTiledWFC wfc) { wfc.predetermined = new List<Predetermined>(); }
 
-    protected void FillEmpty(OverlapWFC wfc, bool[,] fill)
+    protected void FillEmpty(OverlapWFC wfc)
     {
-        for (int i = 0; i < fill.GetLength(1); i++)
+        for (int i = 0; i < wfc.fill.GetLength(1); i++)
         {
-            for (int j = 0; j < fill.GetLength(0); j++)
-            {
-                if (AllEmpty(fill, i, j))
+            for (int j = 0; j < wfc.fill.GetLength(0); j++)
+            { 
+                if (AllEmpty(wfc.fill, i, j))
                     wfc.predetermined.Add(new Predetermined(i * wfc.width + j, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 }));
             }
         }
@@ -26,10 +26,13 @@ public class Preplacement : ScriptableObject
         int sizeX = fill.GetLength(1);
         int sizeY = fill.GetLength(0);
 
-        for (int i = 0; i < 3; i++)
+        // 3 can cause artifacts
+        const int size = 2;
+
+        for (int i = 0; i < size; i++)
         {
             int k = (x + i) % sizeX;
-            for (int j = 0; j < 3; j++)
+            for (int j = 0; j < size; j++)
             {
                 int l = (y + j) % sizeY;
                 if (fill[l, k]) return false;

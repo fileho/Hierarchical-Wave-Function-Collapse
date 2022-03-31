@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "SO/Preplacements/DenseRoom")]
 public class DenseRoom : Preplacement
 {
-    public override void Run(OverlapWFC wfc, bool[,] fill)
+    public override void Run(OverlapWFC wfc)
     {
         wfc.predetermined.Clear();
 
@@ -48,11 +48,11 @@ public class DenseRoom : Preplacement
             (-2, -2)
         };
 
-        for (int i = 0; i < fill.GetLength(0); i++)
+        for (int i = 0; i < wfc.fill.GetLength(0); i++)
         {
-            for (int j = 0; j < fill.GetLength(1); j++)
+            for (int j = 0; j < wfc.fill.GetLength(1); j++)
             {
-                var p = GetEmpty(fill, j, i);
+                var p = GetEmpty(wfc.fill, j, i);
 
                 for (var index = 0; index < corners.Length; index++)
                 {

@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "SO/Preplacements/DungeonLayout")]
 public class DungoenLayout : Preplacement
 {
-    public override void Run(OverlapWFC wfc, bool[,] fill)
+    public override void Run(OverlapWFC wfc)
     {
 
         wfc.predetermined = new List<Predetermined>();

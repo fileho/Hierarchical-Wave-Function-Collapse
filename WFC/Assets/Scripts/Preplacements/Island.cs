@@ -6,7 +6,7 @@ using UnityEngine;
 public class Island : Preplacement
 {
     private byte value = 1;
-    public override void Run(OverlapWFC wfc, bool[,] fill)
+    public override void Run(OverlapWFC wfc)
     {
         int n = wfc.N;
         byte[] pattern = new byte[n * n];

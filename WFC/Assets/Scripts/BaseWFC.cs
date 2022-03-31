@@ -1,10 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 [System.Serializable]
 public class Predetermined
@@ -49,6 +44,7 @@ public class BaseWFC : MonoBehaviour
     public bool debug;
 
     public Preplacement preplacement;
+    public WfcPostprocessing postprocessing;
 
     public int width = 20;
     public int depth = 20;
@@ -57,6 +53,8 @@ public class BaseWFC : MonoBehaviour
     public List<Predetermined> predetermined = new List<Predetermined>();
     [HideInInspector]
     public List<int> removed = new List<int>();
+
+    public bool[,] fill;
 
 
     public virtual void Generate() { }

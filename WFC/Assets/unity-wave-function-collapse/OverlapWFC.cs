@@ -8,8 +8,7 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class OverlapWFC : BaseWFC{
 	public Training training = null;
-	[HideInInspector]
-	public int gridsize = 1;
+    public int gridsize = 1;
     public int seed = 0;
     public int N = 3;
 	public bool periodicInput = true;
@@ -70,6 +69,7 @@ public class OverlapWFC : BaseWFC{
     {
 		width = w;
         depth = h;
+        this.fill = fill;
 
         if (!periodicOutput)
         {
@@ -80,13 +80,16 @@ public class OverlapWFC : BaseWFC{
         debug = false;
 
 
-		RunPreplacing(fill);
+		RunPreplacing();
     }
 
     public override void Generate()
     {
-		if (debug)
-			RunPreplacing(GetPreplacement());
+        if (debug)
+        {
+            fill = GetPreplacement();
+			RunPreplacing();
+        }
 
         if (training == null){Debug.Log("Can't Generate: no designated Training component");}
 		if (IsPrefabRef(training.gameObject)){
@@ -117,9 +120,9 @@ public class OverlapWFC : BaseWFC{
         undrawn = true;
     }
 
-    public void RunPreplacing(bool[,] fill)
+    public void RunPreplacing()
     {	
-		preplacement.Run(this, fill);
+		preplacement.Run(this);
     }
 
     void OnDrawGizmos(){
@@ -185,6 +188,7 @@ public class OverlapWFC : BaseWFC{
 	  		model = null;
 	  		return;
 	  	}
+		postprocessing?.Run(this);
 	}
 
     public override void Upscale(int scale)
@@ -238,10 +242,19 @@ public class OverlapWFC : BaseWFC{
 
  #if UNITY_EDITOR
 [CustomEditor (typeof(OverlapWFC))]
-public class WFCGeneratorEditor : Editor {
+public class WFCGeneratorEditor : Editor
+{
+    private OverlapWFC generator;
+    private bool showWfc;
+    private bool advanced;
+
+    private void OnEnable()
+    {
+        generator = (OverlapWFC) target;
+    }
+
 	public override void OnInspectorGUI () {
-		OverlapWFC generator = (OverlapWFC)target;
-		if (generator.training != null){
+        if (generator.training != null){
 			if(GUILayout.Button("generate")){
 				generator.Generate();
 			}
@@ -251,7 +264,35 @@ public class WFCGeneratorEditor : Editor {
 				}
 			}
 		}
-		DrawDefaultInspector ();
-	}
+
+        generator.training = (Training)EditorGUILayout.ObjectField(
+            "Training", generator.training, typeof(Training), true);
+        generator.preplacement = (Preplacement)EditorGUILayout.ObjectField(
+            "Tile preplacement", generator.preplacement, typeof(Preplacement), false);
+		generator.postprocessing = (WfcPostprocessing)EditorGUILayout.ObjectField(
+            "Postprocessing", generator.postprocessing, typeof(WfcPostprocessing), false);
+
+		showWfc = EditorGUILayout.BeginFoldoutHeaderGroup(showWfc, "WFC DATA");
+        if (showWfc)
+        {
+            generator.N = EditorGUILayout.IntField("N", generator.N);
+            generator.width = EditorGUILayout.IntField("Width", generator.width);
+            generator.depth = EditorGUILayout.IntField("Height", generator.depth);
+            generator.symmetry = EditorGUILayout.IntField("Symmetry", generator.symmetry);
+            generator.iterations = EditorGUILayout.IntField("Iterations", generator.iterations);
+		}
+        EditorGUILayout.EndFoldoutHeaderGroup();
+
+        advanced = EditorGUILayout.BeginFoldoutHeaderGroup(advanced, "Advanced");
+        if (advanced)
+        {
+            generator.debug = EditorGUILayout.Toggle("Debug", generator.debug);
+            generator.seed = EditorGUILayout.IntField("Seed", generator.seed);
+			generator.periodicInput = EditorGUILayout.Toggle("Periodic Input", generator.periodicInput);
+            generator.periodicOutput = EditorGUILayout.Toggle("Periodic Output", generator.periodicOutput);
+        }
+
+		EditorGUILayout.EndFoldoutHeaderGroup();
+    }
 }
 #endif

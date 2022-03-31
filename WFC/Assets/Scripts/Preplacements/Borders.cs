@@ -6,7 +6,7 @@ using UnityEngine;
 public class Borders : Preplacement
 {
     public byte value;
-    public override void Run(OverlapWFC wfc, bool[,] fill)
+    public override void Run(OverlapWFC wfc)
     {
         int n = wfc.N;
         byte[] pattern = new byte[n*n];
@@ -14,10 +14,10 @@ public class Borders : Preplacement
         for (int i = 0; i < n * n; i++)
             pattern[i] = value;
         Fill(wfc, pattern);
-        FillEmpty(wfc, fill);
+        FillEmpty(wfc);
     }
 
-    public override void Run(SimpleTiledWFC wfc, bool[,] fill)
+    public override void Run(SimpleTiledWFC wfc)
     {
         byte[] pattern = new byte[] {value};
         Fill(wfc, pattern);

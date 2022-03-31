@@ -108,12 +108,15 @@ public class Training : MonoBehaviour{
 		RS[0] = 0;
 
 		// makes tiles ordering consistent with tile painter
-        var palette = GetComponentInParent<TilePainter>().palette;
-        for (int i = 0; i < palette.Count; i++)
+        if (transform.parent != null)
         {
-            var t = palette[i];
-            tiles[i + 1] = t;
-            str_tile.Add(t.name + 0, (byte)(i + 1));
+            var palette = GetComponentInParent<TilePainter>().palette;
+			for (int i = 0; i < palette.Count; i++)
+            {
+                var t = palette[i];
+                tiles[i + 1] = t;
+                str_tile.Add(t.name + 0, (byte)(i + 1));
+            }
         }
 
 		for (int i = 0; i < cnt; i++){
