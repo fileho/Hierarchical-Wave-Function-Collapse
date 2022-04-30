@@ -8,11 +8,11 @@ public class Postprocessing : MonoBehaviour
     public GameObject[,] tiles;
     public GameObject path;
     public GameObject wall;
-    public int pathSize = 2;
+    public int pathSize = 3;
 
     public void AddPaths()
     {
-        Layer l = new Layer { type = new List<int>(){1} };
+        Layer l = new Layer { type = new List<int>(){2} };
         var layouts = Utilities.FindAllPatterns(tiles, l);
 
         List<(int, int)> edges = new List<(int, int)>();
@@ -87,7 +87,7 @@ public class Postprocessing : MonoBehaviour
         // ReSharper disable once LoopVariableIsNeverChangedInsideLoop
         while (pos != goal)
         {
-            PlacePath(pos.x, pos.y);
+            CreatePath(pos.x, pos.y);
 
             var dir = goal - pos;
 
@@ -101,24 +101,30 @@ public class Postprocessing : MonoBehaviour
         }
     }
 
-    private void PlacePath(int x, int y)
+    private void CreatePath(int x, int y)
     {
         for (int i = 0; i < pathSize; i++)
             for (int j = 0; j < pathSize; j++)
-                PlaceTile(x - i, y - j, path);
+                PlacePath(x - i, y - j);
 
 
-        PlaceTile(x - 1, y, path);
-        PlaceTile(x - 1, y - 1, path);
-        PlaceTile(x, y - 1, path);
+        PlacePath(x - 1, y);
+        PlacePath(x - 1, y - 1);
+        PlacePath(x, y - 1);
        
         for (int i = -1; i <= pathSize; i++)
             for (int j = -1; j <= pathSize; j++)
                 PlaceWalls(x - i, y - j);
     }
 
-    private void PlaceTile(int x, int y, GameObject tile)
+    private void PlaceTile(int x, int y, GameObject tile, Func<int, bool> predicate)
     {
+        if (x < 0 || y < 0 || x >= tiles.GetLength(1) || y >= tiles.GetLength(0))
+            return;
+
+        if (!predicate(tiles[y, x].GetComponent<TileType>().type))
+            return;
+
         DestroyObject(tiles[y, x]);
         Vector3 pos = transform.position;
         var o = Instantiate(tile, new Vector3(pos.x + y, pos.y + x, 0), Quaternion.identity);
@@ -126,15 +132,15 @@ public class Postprocessing : MonoBehaviour
         tiles[y, x] = o;
     }
 
+
+    private void PlacePath(int x, int y)
+    {
+        PlaceTile(x, y, path, v => v != 2);
+    }
+
     private void PlaceWalls(int x, int y)
     {
-        if (x < 0 || y < 0 || x >= tiles.GetLength(1) || y >= tiles.GetLength(0))
-            return;
-
-        if (tiles[y, x].GetComponent<TileType>().type != 0)
-            return;
-
-        PlaceTile(x, y, wall);
+        PlaceTile(x, y, wall, v => v == 0);
     }
 
 

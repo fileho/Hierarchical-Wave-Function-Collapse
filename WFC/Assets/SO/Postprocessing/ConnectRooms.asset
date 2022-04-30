@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfeaa0aaa01aa2e4cae3a54b61237058, type: 3}
   m_Name: ConnectRooms
   m_EditorClassIdentifier: 
-  path: {fileID: 6583401720048865544, guid: 3ef02a6dc7e072d4d8b08377682ddba9, type: 3}
-  wall: {fileID: 6583401720048865544, guid: d63b97b10387274438feefafa2cd1303, type: 3}
-  pathSize: 2
+  path: {fileID: 6583401720048865544, guid: bbcf1b830a4845c44a3a233c8bf7f64e, type: 3}
+  wall: {fileID: 6583401720048865544, guid: a7ed7a6d3d626a747acd1d4a76070514, type: 3}
+  pathSize: 3

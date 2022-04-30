@@ -23,7 +23,7 @@ public class ConnectRooms : WfcPostprocessing
     
     public void AddPaths()
     {
-        Layer l = new Layer { type = new List<int>() { 1 } };
+        Layer l = new Layer { type = new List<int>() { 2 } };
         var layouts = Utilities.FindAllPatterns(tiles, l);
 
         List<(int, int)> edges = new List<(int, int)>();
@@ -98,7 +98,7 @@ public class ConnectRooms : WfcPostprocessing
         // ReSharper disable once LoopVariableIsNeverChangedInsideLoop
         while (pos != goal)
         {
-            PlacePath(pos.x, pos.y);
+            CreatePath(pos.x, pos.y);
 
             var dir = goal - pos;
 
@@ -112,36 +112,49 @@ public class ConnectRooms : WfcPostprocessing
         }
     }
 
-    private void PlacePath(int x, int y)
+    private void CreatePath(int x, int y)
     {
         for (int i = 0; i < pathSize; i++)
-            for (int j = 0; j < pathSize; j++)
-                PlaceTile(x - i, y - j, path);
+        for (int j = 0; j < pathSize; j++)
+            PlacePath(x - i, y - j);
+
+
+        PlacePath(x - 1, y);
+        PlacePath(x - 1, y - 1);
+        PlacePath(x, y - 1);
 
         for (int i = -1; i <= pathSize; i++)
-            for (int j = -1; j <= pathSize; j++)
-                PlaceWalls(x - i, y - j);
+        for (int j = -1; j <= pathSize; j++)
+            PlaceWalls(x - i, y - j);
     }
 
-    private void PlaceTile(int x, int y, GameObject tile)
-    {
-        DestroyObject(tiles[y, x]);
-        Vector3 pos = transform.position;
-        var o = Instantiate(tile, new Vector3(pos.x + y, pos.y + x, 0), Quaternion.identity);
-        o.transform.SetParent(transform);
-        tiles[y, x] = o;
-    }
-
-    private void PlaceWalls(int x, int y)
+    private void PlaceTile(int x, int y, GameObject tile, Func<int, bool> predicate)
     {
         if (x < 0 || y < 0 || x >= tiles.GetLength(1) || y >= tiles.GetLength(0))
             return;
 
         var t = tiles[y, x];
-
-        if (t == null || t.GetComponent<TileType>().type != 0)
+        if (t == null)
             return;
 
-        PlaceTile(x, y, wall);
+        if (!predicate(t.GetComponent<TileType>().type))
+            return;
+
+        DestroyObject(tiles[y, x]);
+        Vector3 pos = transform.position;
+        var o = Instantiate(tile, new Vector3(pos.x + y, pos.y + x, -1), Quaternion.identity);
+        o.transform.SetParent(transform);
+        tiles[y, x] = o;
+    }
+
+
+    private void PlacePath(int x, int y)
+    {
+        PlaceTile(x, y, path, v => v != 2);
+    }
+
+    private void PlaceWalls(int x, int y)
+    {
+        PlaceTile(x, y, wall, v => v == 0);
     }
 }

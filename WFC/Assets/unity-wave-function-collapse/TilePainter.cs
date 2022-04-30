@@ -258,14 +258,7 @@ public class TilePainter : MonoBehaviour{
 
     public void TryCompile()
     {
-        var child = transform.GetChild(0);
-        if (child == null)
-        {
-			Debug.Log("Compilation Failed, no child");
-            return;
-        }
-
-        var training = child.GetComponent<Training>();
+        var training = GetComponentInChildren<Training>();
         if (training == null)
         {
             Debug.Log("Compilation Failed, no training component");

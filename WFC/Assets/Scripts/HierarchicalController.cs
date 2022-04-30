@@ -38,7 +38,7 @@ public class Layer
 [ExecuteInEditMode]
 public class HierarchicalController : MonoBehaviour
 {
- //   [SerializeField] private Layer root;
+    public Vector2Int size = new Vector2Int(40, 30);
     public List<Layer> root;
 
     [SerializeField] private Postprocessing postprocessing;
@@ -104,7 +104,7 @@ public class HierarchicalController : MonoBehaviour
 
         works++;
         var top = Instantiate(root[0].wfc);
-        top.SetSize(40,25);
+        top.SetSize(size.x,size.y);
         top.Generate();
         top.transform.position = new Vector3(0, 0, 0);
         top.transform.parent = transform.GetChild(0);
