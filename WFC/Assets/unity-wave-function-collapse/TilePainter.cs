@@ -239,7 +239,8 @@ public class TilePainter : MonoBehaviour{
 		tiles = new GameObject("tiles");
 		tiles.transform.parent = gameObject.transform;
 		tiles.transform.localPosition = new Vector3();
-	}
+        tiles.AddComponent<Training>();
+    }
 
 	public void OnDrawGizmos(){
 		Gizmos.color = Color.white;
@@ -266,6 +267,30 @@ public class TilePainter : MonoBehaviour{
 		}
 		training.Compile();
     }
+
+    public void Fill()
+    {
+		Resize();
+		if (color == null)
+			return;
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+			{
+				if (tileobs[i,j])
+                    DestroyImmediate(tileobs[i, j]);
+
+				GameObject o = CreatePrefab(color, new Vector3(), color_rotation);
+                o.transform.parent = tiles.transform;
+                o.transform.localPosition = (new Vector3(i, j, 0) * gridsize);
+                o.transform.localRotation = color_rotation;
+                tileobs[i, j] = o;
+
+			}
+        }
+    }
+
 	#endif
 }
  
@@ -289,6 +314,8 @@ public class TilePainter : MonoBehaviour{
 			me.Clear();}
 		if (GUILayout.Button("Compile"))
 			me.TryCompile();
+		if (GUILayout.Button("Fill"))
+			me.Fill();
 		DrawDefaultInspector();}
 
 	private bool AmHovering(Event e){

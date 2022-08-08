@@ -5,7 +5,14 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "SO/Preplacements/Borders")]
 public class Borders : Preplacement
 {
+    public enum FillArea
+    {
+        All, TopDown
+    }
+
     public byte value;
+
+    public FillArea fillArea = FillArea.All;
     public override void Run(OverlapWFC wfc)
     {
         int n = wfc.N;
@@ -30,7 +37,10 @@ public class Borders : Preplacement
         for (int i = 0; i < wfc.width; i++)
             wfc.predetermined.Add(new Predetermined(wfc.width * (wfc.depth - 1) + i, pattern));
 
-        for (int i = 0; i < wfc.depth; i++)
-            wfc.predetermined.Add(new Predetermined(i * wfc.width + wfc.width - 1, pattern));
+        if (fillArea == FillArea.All)
+        {
+            for (int i = 0; i < wfc.depth; i++)
+                wfc.predetermined.Add(new Predetermined(i * wfc.width + wfc.width - 1, pattern));
+        }
     }
 }
