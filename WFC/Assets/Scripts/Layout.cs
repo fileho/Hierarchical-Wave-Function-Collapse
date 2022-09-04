@@ -9,7 +9,7 @@ public class Layout
     public Vector2Int min;
     public Vector2Int size;
 
-    public readonly bool[,] fill;
+    public readonly bool[,] fill; // true -> place to fill
 
     public bool Contains(int x, int y)
     {

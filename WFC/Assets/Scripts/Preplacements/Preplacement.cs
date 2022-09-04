@@ -15,13 +15,13 @@ public class Preplacement : ScriptableObject
         {
             for (int j = 0; j < wfc.fill.GetLength(0); j++)
             { 
-                if (AllEmpty(wfc.fill, i, j))
+                if (AnyEmpty(wfc.fill, i, j))
                     wfc.predetermined.Add(new Predetermined(i * wfc.width + j, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 }));
             }
         }
     }
 
-    private bool AllEmpty(bool[,] fill, int x, int y)
+    private static bool AnyEmpty(bool[,] fill, int x, int y)
     {
         int sizeX = fill.GetLength(1);
         int sizeY = fill.GetLength(0);
@@ -31,15 +31,15 @@ public class Preplacement : ScriptableObject
 
         for (int i = 0; i < size; i++)
         {
-            int k = (x + i) % sizeX;
+            int k = (x + i + sizeX) % sizeX;
             for (int j = 0; j < size; j++)
             {
-                int l = (y + j) % sizeY;
-                if (fill[l, k]) return false;
+                int l = (y + j + sizeY) % sizeY;
+                if (!fill[l, k]) return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     protected bool[] GetEmpty(bool[,] fill, int x, int y)

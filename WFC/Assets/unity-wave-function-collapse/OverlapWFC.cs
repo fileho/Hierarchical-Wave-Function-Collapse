@@ -19,6 +19,7 @@ public class OverlapWFC : BaseWFC{
 	public int iterations = 0;
 	public bool incremental = true;
 	public OverlappingModel model = null;
+	public bool autoTile = false;
 //	public GameObject[,] rendering;
     [HideInInspector]
 	public GameObject output;
@@ -156,14 +157,15 @@ public class OverlapWFC : BaseWFC{
 		if (output == null){return;}
 		if (group == null){return;}
         undrawn = false;
-		try{
-			for (int y = 0; y < depth; y++){
+		try
+        {
+            for (int y = 0; y < depth; y++){
 				for (int x = 0; x < width; x++){
 					if (rendering[x,y] == null){
 						if (IsRemoved(y * width + x))
 							continue;
 
-						int v = (int)model.Sample(x, y);
+                        int v = (int)model.Sample(x, y);
 						if (v != 99 && v < training.tiles.Length){
 							Vector3 pos = new Vector3(x*gridsize, y*gridsize, 0f);
 							int rot = (int)training.RS[v];
@@ -176,20 +178,36 @@ public class OverlapWFC : BaseWFC{
 								tile.transform.localEulerAngles = new Vector3(0, 0, 360 - (rot * 90));
 								tile.transform.localScale = fscale;
 								rendering[x,y] = tile;
-							}
+                            }
 						} else
                         {
                             undrawn = true;
                         }
 					}
 				}
-	  		}
-	  	} catch (IndexOutOfRangeException) {
+            }
+        } catch (IndexOutOfRangeException) {
 	  		model = null;
 	  		return;
 	  	}
+        AutoTile();
 		postprocessing?.Run(this);
 	}
+
+    private void AutoTile()
+    {
+        if (!autoTile) return;
+        for (int y = 0; y < depth; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+				var at = rendering[x, y]?.GetComponent<Autotiling>();
+
+                if (at != null)
+                    at.AutoTile(rendering, x, y);
+            }
+        }
+    }
 
     public override void Upscale(int scale)
     {
@@ -290,6 +308,7 @@ public class WFCGeneratorEditor : Editor
             generator.seed = EditorGUILayout.IntField("Seed", generator.seed);
 			generator.periodicInput = EditorGUILayout.Toggle("Periodic Input", generator.periodicInput);
             generator.periodicOutput = EditorGUILayout.Toggle("Periodic Output", generator.periodicOutput);
+            generator.autoTile = EditorGUILayout.Toggle("AutoTile", generator.autoTile);
         }
 
 		EditorGUILayout.EndFoldoutHeaderGroup();
