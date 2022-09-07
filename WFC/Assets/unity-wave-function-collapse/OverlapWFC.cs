@@ -56,11 +56,7 @@ public class OverlapWFC : BaseWFC{
 		}
 	}
 
-    void Start(){
-	//	Generate();
-	}
-
-	void Update(){
+    void Update(){
 		if (incremental){
 			Run();
 		}
@@ -191,7 +187,8 @@ public class OverlapWFC : BaseWFC{
 	  		return;
 	  	}
         AutoTile();
-		postprocessing?.Run(this);
+		if (postprocessing)
+		    postprocessing.Run(this);
 	}
 
     private void AutoTile()
@@ -201,10 +198,13 @@ public class OverlapWFC : BaseWFC{
         {
             for (int x = 0; x < width; x++)
             {
-				var at = rendering[x, y]?.GetComponent<Autotiling>();
+                if (rendering != null)
+                {
+                    var at = rendering[x, y].GetComponent<Autotilling>();
 
-                if (at != null)
-                    at.AutoTile(rendering, x, y);
+                    if (at != null)
+                        at.AutoTile(rendering, x, y);
+                }
             }
         }
     }

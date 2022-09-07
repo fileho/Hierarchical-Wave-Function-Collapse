@@ -10,7 +10,7 @@ using UnityEditor;
 public class SimpleTiledWFC : BaseWFC{
 	
 	public TextAsset xml = null;
-	private string subset = "";
+	private readonly string subset = "";
 
 	public int gridsize = 1;
 
@@ -27,8 +27,8 @@ public class SimpleTiledWFC : BaseWFC{
 	public Dictionary<string, GameObject> obmap = new Dictionary<string, GameObject>();
     private bool undrawn = true;
 
-	public void destroyChildren (){
-		foreach (Transform child in this.transform) {
+	public void DestroyChildren (){
+		foreach (Transform child in transform) {
      		GameObject.DestroyImmediate(child.gameObject);
  		}
  	}
@@ -82,8 +82,8 @@ public class SimpleTiledWFC : BaseWFC{
 		if (output == null){
 			output = new GameObject("output-tiled");
 			output.transform.parent = transform;
-			output.transform.position = this.gameObject.transform.position;
-			output.transform.rotation = this.gameObject.transform.rotation;}
+			output.transform.SetPositionAndRotation(gameObject.transform.position, gameObject.transform.rotation);
+        }
 
 		for (int i = 0; i < output.transform.childCount; i++){
 			GameObject go = output.transform.GetChild(i).gameObject;
@@ -91,8 +91,7 @@ public class SimpleTiledWFC : BaseWFC{
 		}
 		group = new GameObject(xml.name).transform;
 		group.parent = output.transform;
-		group.position = output.transform.position;
-		group.rotation = output.transform.rotation;
+        group.SetPositionAndRotation(output.transform.position, output.transform.rotation);
         group.localScale = new Vector3(1f, 1f, 1f);
         rendering = new GameObject[width, depth];
 		this.model = new SimpleTiledModel(xml.text, subset, width, depth, periodic, predetermined);
@@ -104,39 +103,38 @@ public class SimpleTiledWFC : BaseWFC{
 		if (group == null){return;}
         undrawn = false;
 		for (int y = 0; y < depth; y++){
-			for (int x = 0; x < width; x++){ 
-				if (rendering[x,y] == null){
-                    if (IsRemoved(y * width + x))
-                        continue;
+			for (int x = 0; x < width; x++)
+            {
+                if (rendering[x, y] != null) continue;
+                if (IsRemoved(y * width + x))
+                    continue;
 
-                    string v = model.Sample(x, y);
-					int rot = 0;
-					GameObject fab = null;
-					if (v != "?"){
-						rot = int.Parse(v.Substring(0,1));
-						v = v.Substring(1);
-						if (!obmap.ContainsKey(v)){
-							fab = (GameObject)Resources.Load(v, typeof(GameObject));
-							obmap[v] = fab;
-						} else {
-							fab = obmap[v];
-						}
-						if (fab == null){
-							continue;}
-						Vector3 pos = new Vector3(x*gridsize, y*gridsize, 0f);
-						GameObject tile = (GameObject)Instantiate(fab, new Vector3() , Quaternion.identity);
-						Vector3 fscale = tile.transform.localScale;
-						tile.transform.parent = group;
-						tile.transform.localPosition = pos;
-						tile.transform.localEulerAngles = new Vector3(0, 0, 360-(rot*90));
-						tile.transform.localScale = fscale;
-						rendering[x,y] = tile;
-                    } else
-                    {
-                        undrawn = true;
+                string v = model.Sample(x, y);
+                if (v != "?"){
+                    int rot = int.Parse(v.Substring(0,1));
+                    v = v.Substring(1);
+                    GameObject fab;
+                    if (!obmap.ContainsKey(v)){
+                        fab = (GameObject)Resources.Load(v, typeof(GameObject));
+                        obmap[v] = fab;
+                    } else {
+                        fab = obmap[v];
                     }
-				}
-			}
+                    if (fab == null){
+                        continue;}
+                    Vector3 pos = new Vector3(x*gridsize, y*gridsize, 0f);
+                    GameObject tile = (GameObject)Instantiate(fab, new Vector3() , Quaternion.identity);
+                    Vector3 fscale = tile.transform.localScale;
+                    tile.transform.parent = @group;
+                    tile.transform.localPosition = pos;
+                    tile.transform.localEulerAngles = new Vector3(0, 0, 360-(rot*90));
+                    tile.transform.localScale = fscale;
+                    rendering[x,y] = tile;
+                } else
+                {
+                    undrawn = true;
+                }
+            }
   		}	
 	}
 
@@ -149,8 +147,7 @@ public class SimpleTiledWFC : BaseWFC{
 
         var upGroup = new GameObject(xml.name).transform;
         upGroup.parent = output.transform;
-        upGroup.position = output.transform.position;
-        upGroup.rotation = output.transform.rotation;
+        upGroup.SetPositionAndRotation(output.transform.position, output.transform.rotation);
 
         for (int w = 0; w < width; w++)
         {
@@ -160,10 +157,11 @@ public class SimpleTiledWFC : BaseWFC{
                 {
                     for (int j = 0; j < scale; j++)
                     {
-                        var o = rendering[w, h] != null ? Instantiate(rendering[w, h], new Vector3(w * scale + i, h * scale + j, 0),
-                            Quaternion.identity) : null;
+                        var o = rendering[w, h] != null ? Instantiate(rendering[w, h], 
+                            new Vector3(w * scale + i, h * scale + j, 0), Quaternion.identity) : null;
                         upscaled[w * scale + i, h * scale + j] = o;
-                        o.transform.parent = upGroup;
+                        if (o != null) 
+                            o.transform.parent = upGroup;
                     }
                 }
             }

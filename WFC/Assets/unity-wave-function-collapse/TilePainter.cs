@@ -29,9 +29,8 @@ public class TilePainter : MonoBehaviour{
 #if UNITY_EDITOR
 
 	private static bool IsAssetAFolder(UnityEngine.Object obj){
-		string path = "";
-		if (obj == null){return false;}
-		path = AssetDatabase.GetAssetPath(obj.GetInstanceID());
+        if (obj == null){return false;}
+        string path = AssetDatabase.GetAssetPath(obj.GetInstanceID());
 		if (path.Length > 0){
 		if (Directory.Exists(path)){
 			return true;

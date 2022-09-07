@@ -32,36 +32,45 @@ public static class Utilities
         Vector2Int pos = new Vector2Int(x, y);
         int width = rendering.GetLength(1);
         int height = rendering.GetLength(0);
-        HashSet<Vector2Int> visited = new HashSet<Vector2Int> { pos };
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
         Vector2Int min = pos;
         Vector2Int max = pos;
-
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
         queue.Enqueue(pos);
-
-        Vector2Int[] dirs = { Vector2Int.right, Vector2Int.down, Vector2Int.up, Vector2Int.left };
-
+        
         while (queue.Count > 0)
         {
             pos = queue.Dequeue();
-            foreach (var dir in dirs)
-            {
-                Vector2Int npos = pos + dir;
+            if (visited.Contains(pos))
+                continue;
+            if (!IsValid(pos.x, width) || !IsValid(pos.y, height))
+                continue;
+            if (!layer.Contains(rendering[pos.y, pos.x]))
+                continue;
 
-                if (visited.Contains(npos))
-                    continue;
-                if (npos.x < 0 || npos.x >= width || npos.y < 0 || npos.y >= height)
-                    continue;
-                if (!layer.Contains(rendering[npos.y, npos.x]))
-                    continue;
-
-                min = Vector2Int.Min(min, npos);
-                max = Vector2Int.Max(max, npos);
-                visited.Add(npos);
-                queue.Enqueue(npos);
-            }
+            min = Vector2Int.Min(min, pos);
+            max = Vector2Int.Max(max, pos);
+            visited.Add(pos);
+            AddToQueue(queue, visited, pos);
         }
 
         return new Layout(min, max, visited);
+    }
+
+    private static void AddToQueue(Queue<Vector2Int> queue, HashSet<Vector2Int> visited, Vector2Int pos)
+    {
+        Vector2Int[] dirs = { Vector2Int.right, Vector2Int.down, Vector2Int.up, Vector2Int.left };
+        foreach (var dir in dirs)
+        {
+            var newPos = pos + dir;
+            if (!visited.Contains(newPos))
+                queue.Enqueue(newPos);
+        }
+    }
+
+
+    public static bool IsValid(int value, int max)
+    {
+        return value >= 0 && value < max;
     }
 }

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Networking.PlayerConnection;
-using UnityEditor.UIElements;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -20,9 +18,7 @@ public class Layer
 
     public bool Contains(GameObject go)
     {
-        if (!go)
-            return false;
-        return type.Contains(go.GetComponent<TileType>().type);
+        return go && type.Contains(go.GetComponent<TileType>().type);
     }
 
     public void Reset()
@@ -95,10 +91,8 @@ public class HierarchicalController : MonoBehaviour
     {
         generatedLayers = 0;
 
-        foreach (var wfc in root)
-        {
+        foreach (var wfc in root) 
             wfc.Reset();
-        }
 
         Clear();
 
@@ -112,31 +106,28 @@ public class HierarchicalController : MonoBehaviour
         root[0].instances.Add(top);
     }
 
-    public void UpscaleMap()
+    public void UpscaleMap(int scale = 2)
     {
-        root[0].instances[0].Upscale(2);
+        root[0].instances[0].Upscale(scale);
     }
 
     public void Clear()
     {
-        // create object to hold wfc instances
-        if (transform.childCount == 0)
-        {
-            GameObject go = new GameObject("WFCs");
-            go.transform.SetParent(transform);
-            return;
-        }
+        if (CreateHoldingObject()) return;
 
         Transform parent = transform.GetChild(0);
 
-        while (parent.childCount > 0)
-        {
-        #if UNITY_EDITOR
-            DestroyImmediate(parent.GetChild(0).gameObject);
-        #else
-            Destroy(parent.GetChild(0).gameObject);
-        #endif
-        }
+        while (parent.childCount > 0) DestroyObject(parent.GetChild(0).gameObject);
+    }
+
+    private bool CreateHoldingObject()
+    {
+        if (transform.childCount != 0) 
+            return false;
+
+        GameObject go = new GameObject("WFCs");
+        go.transform.SetParent(transform);
+        return true;
     }
 
     public void GenerateSecondLayer()

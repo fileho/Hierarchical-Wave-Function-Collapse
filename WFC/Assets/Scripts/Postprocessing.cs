@@ -38,7 +38,6 @@ public class Postprocessing : MonoBehaviour
     private static bool Connected(int i, int j, List<(int, int)> edges)
     {
         HashSet<int> visited = new HashSet<int>();
-
         Queue<int> queue = new Queue<int>();
         queue.Enqueue(i);
 
@@ -47,21 +46,24 @@ public class Postprocessing : MonoBehaviour
             int val = queue.Dequeue();
             if (val == j)
                 return true;
-
             visited.Add(val);
-
-            foreach (var (x, y) in edges)
-            {
-                if (x == val)
-                    if (!visited.Contains(y))
-                        queue.Enqueue(y);
-                if (y == val)
-                    if (!visited.Contains(x))
-                        queue.Enqueue(x);
-            }
+            AddEdgesToQueue(queue, visited, edges, val);
         }
 
         return false;
+    }
+
+    private static void AddEdgesToQueue(Queue<int> queue, HashSet<int> visited, List<(int, int)> edges, int edgeValue)
+    {
+        foreach (var (x, y) in edges)
+        {
+            if (x == edgeValue)
+                if (!visited.Contains(y))
+                    queue.Enqueue(y);
+            if (y == edgeValue)
+                if (!visited.Contains(x))
+                    queue.Enqueue(x);
+        }
     }
 
     private List<int> FindNearestLayout(List<Layout> layouts, int index)
@@ -88,15 +90,12 @@ public class Postprocessing : MonoBehaviour
         while (pos != goal)
         {
             CreatePath(pos.x, pos.y);
-
             var dir = goal - pos;
-
             if (dir.x != 0)
             {
                 pos.x += dir.x / Math.Abs(dir.x);
                 continue;
             }
-
             pos.y += dir.y / Math.Abs(dir.y);
         }
     }
@@ -106,7 +105,6 @@ public class Postprocessing : MonoBehaviour
         for (int i = 0; i < pathSize; i++)
             for (int j = 0; j < pathSize; j++)
                 PlacePath(x - i, y - j);
-
 
         PlacePath(x - 1, y);
         PlacePath(x - 1, y - 1);
