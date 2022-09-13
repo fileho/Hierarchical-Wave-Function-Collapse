@@ -6,12 +6,11 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-
 [System.Serializable]
 public class Layer
 {
-    public List<int> type;
     public BaseWFC wfc;
+    public List<int> type;
     public List<int> children;
     [HideInInspector]
     public List<BaseWFC> instances;
@@ -27,48 +26,49 @@ public class Layer
     }
 }
 
+[System.Serializable]
+public class LayerList
+{
+    public List<Layer> layer;
 
-
+    public void ResetLayer()
+    {
+        foreach (var wfc in layer) 
+            wfc.Reset();
+    }
+}
 
 
 [ExecuteInEditMode]
 public class HierarchicalController : MonoBehaviour
 {
     public Vector2Int size = new Vector2Int(40, 30);
-    public List<Layer> root;
 
     [SerializeField] private Postprocessing postprocessing;
-
-    public static HierarchicalController instance;
 
     private int works = 0;
     private int generatedLayers = 0;
 
     private GameObject[,] tiles;
 
-    private void Awake()
+    public List<LayerList> layers;
+    private bool enableCallbacks = false;
+
+    private bool upscaled = false;
+
+    public void StartGenerating()
     {
-        instance = this;
-    }
-
-
-    private void Start()
-    {
-        if (!EditorApplication.isPlaying)
-            return;
-
-        GenerateTopLayer();
+        Debug.Log("GENERATING STARTED");
+        enableCallbacks = true;
+        GenerateLayer(0);
     }
 
     // wfc done callback
-    public void GenerationDone()
+    private void OnGenerationDone()
     {
         works--;
-
-        if (works == 0)
-        {
+        if (works == 0) 
             UpdateLogic();
-        }
     }
 
     // each wfc in one layer is done
@@ -77,38 +77,63 @@ public class HierarchicalController : MonoBehaviour
         if (!EditorApplication.isPlaying)
             return;
 
-        if (generatedLayers == 0)
+        if (!enableCallbacks)
+            return;
+
+        ++generatedLayers;
+
+        if (generatedLayers == 1 && !upscaled)
         {
+            ++works;
+            --generatedLayers;
+            upscaled = true;
             UpscaleMap();
-            UpscaleMap();
-            GenerateSecondLayer();
-            ++generatedLayers;
+            return;
         }
+
+
+        if (generatedLayers < layers.Count) 
+            GenerateLayer(generatedLayers);
+        else
+            Debug.Log("GENERATING DONE");
     }
 
 
-    public void GenerateTopLayer()
+    private void GenerateTopLayer()
     {
         generatedLayers = 0;
+        works = 0;
+        upscaled = false;
 
-        foreach (var wfc in root) 
-            wfc.Reset();
+        foreach (var layer in layers) 
+            layer.ResetLayer();
 
         Clear();
 
-        works++;
-        var top = Instantiate(root[0].wfc);
-        top.SetSize(size.x,size.y);
-        top.Generate();
-        top.transform.position = new Vector3(0, 0, 0);
-        top.transform.parent = transform.GetChild(0);
+        var root = layers[0].layer[0];
+        SetRootChildren(root);
 
-        root[0].instances.Add(top);
+        var top = Instantiate(root.wfc);
+        top.SetSize(size.x,size.y);
+        top.transform.position = new Vector3(0, 0, 0) + transform.position;
+        WfcGeneration(top, root);
+    }
+
+    private void SetRootChildren(Layer root)
+    {
+        if (layers.Count < 2) return;
+
+        if (root.children.Count == layers[1].layer.Count) return;
+        
+        root.children.Clear();
+        for (int i = 0; i < layers[1].layer.Count; i++)
+            root.children.Add(i);
     }
 
     public void UpscaleMap(int scale = 2)
     {
-        root[0].instances[0].Upscale(scale);
+        // incorrect
+        layers[0].layer[0].instances[0].Upscale(scale);
     }
 
     public void Clear()
@@ -130,32 +155,45 @@ public class HierarchicalController : MonoBehaviour
         return true;
     }
 
-    public void GenerateSecondLayer()
+    public void GenerateLayer(int layerIndex)
     {
-        GenerateLayer(root[0]);
+        if (layerIndex == 0)
+        {
+            GenerateTopLayer();
+            return;
+        }
+
+        foreach (var prevLayer in layers[layerIndex - 1].layer) 
+            GenerateLayer(prevLayer, layers[layerIndex]);
     }
+    
 
-
-    private void GenerateLayer(Layer layer)
+    private void GenerateLayer(Layer layer, LayerList nextLayer)
     {
-        foreach (var instance in layer.instances)
+        foreach (var wfcInstance in layer.instances)
         {
             foreach (var val in layer.children)
             {
-                var secondLayer = root[val];
-
-                foreach (var l in Utilities.FindAllPatterns(instance.rendering, secondLayer))
+                var secondLayer = nextLayer.layer[val];
+                foreach (var l in Utilities.FindAllPatterns(wfcInstance.rendering, secondLayer))
                 {
                     var wfc = Instantiate(secondLayer.wfc);
                     wfc.SetSize(l.size.y, l.size.x, l.fill);
                     l.FillWfc(wfc);
-                    wfc.Generate();
-                    wfc.transform.position = new Vector3(l.min.y, l.min.x, -1);
-                    wfc.transform.parent = transform.GetChild(0);
-                    secondLayer.instances.Add(wfc);
+                    wfc.transform.position = new Vector3(l.min.y, l.min.x, -1) + wfcInstance.transform.position;
+                    WfcGeneration(wfc, secondLayer);
                 }
             }
         }
+    }
+
+    private void WfcGeneration(BaseWFC wfc, Layer layer)
+    {
+        ++works;
+        wfc.generationDone.AddListener(OnGenerationDone);
+        wfc.Generate();
+        wfc.transform.parent = transform.GetChild(0);
+        layer.instances.Add(wfc);
     }
 
     public void ExportMap()
@@ -164,24 +202,29 @@ public class HierarchicalController : MonoBehaviour
 
         Postprocessing map = Instantiate(postprocessing, Vector3.zero, Quaternion.identity);
         map.gameObject.name = "Map";
-        var r = root[0].instances[0];
+        var r = layers[0].layer[0].instances[0];
         tiles = new GameObject[r.rendering.GetLength(0), r.rendering.GetLength(1)];
         map.tiles = new GameObject[tiles.GetLength(0), tiles.GetLength(1)];
 
-        Queue<Layer> queue = new Queue<Layer>();
-        queue.Enqueue(root[0]);
+        // Queue<Layer> queue = new Queue<Layer>();
+        // queue.Enqueue(root[0]);
+        // 
+        // while (queue.Count > 0)
+        // {
+        //     Layer l = queue.Dequeue();
+        //     foreach (var inst in l.instances)
+        //     {
+        //         ExportLayer(map, tiles, inst);
+        //     }
+        // 
+        //     foreach (var c in l.children)
+        //         queue.Enqueue(root[c]);
+        // }
 
-        while (queue.Count > 0)
-        {
-            Layer l = queue.Dequeue();
-            foreach (var inst in l.instances)
-            {
-                ExportLayer(map, tiles, inst);
-            }
-
-            foreach (var c in l.children)
-                queue.Enqueue(root[c]);
-        }
+        foreach (var layer in layers)
+            foreach (var l in layer.layer)
+                foreach (var wfcInstance in l.instances)
+                    ExportLayer(map, tiles, wfcInstance);
 
     }
 
@@ -216,39 +259,3 @@ public class HierarchicalController : MonoBehaviour
 #endif
     }
 }
-
-#if UNITY_EDITOR
-[CustomEditor(typeof(HierarchicalController))]
-public class HierarchicalControllerEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        HierarchicalController generator = (HierarchicalController)target;
-        if (GUILayout.Button("Clear"))
-        {
-            generator.Clear();
-        }
-        if (GUILayout.Button("Generate top layer"))
-        {
-            generator.GenerateTopLayer();
-        }
-
-        if (GUILayout.Button("Upscale Map"))
-        {
-            generator.UpscaleMap();
-        }
-
-        if (GUILayout.Button("Generate second layer"))
-        {
-            generator.GenerateSecondLayer();
-        }
-
-        if (GUILayout.Button("Export Map"))
-        {
-            generator.ExportMap();
-        }
-
-        DrawDefaultInspector();
-    }
-}
-#endif

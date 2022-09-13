@@ -26,7 +26,7 @@ public class OverlapWFC : BaseWFC{
 	private Transform group;
     private bool undrawn = true;
 
-	public static bool IsPrefabRef(UnityEngine.Object o){
+    public static bool IsPrefabRef(UnityEngine.Object o){
 		#if UNITY_EDITOR
 		return PrefabUtility.GetOutermostPrefabInstanceRoot(o) != null;
 		#else
@@ -64,7 +64,10 @@ public class OverlapWFC : BaseWFC{
 
     public override void SetSize(int w, int h, bool[,] fill)
     {
-		width = w;
+        if (Application.isPlaying)
+            iterations = 200;
+
+        width = w;
         depth = h;
         this.fill = fill;
 
@@ -75,9 +78,7 @@ public class OverlapWFC : BaseWFC{
 		}
 
         debug = false;
-
-
-		RunPreplacing();
+        RunPreplacing();
     }
 
     public override void Generate()
@@ -134,10 +135,9 @@ public class OverlapWFC : BaseWFC{
         if (undrawn == false) { return; }
         if (model.Run(seed, iterations)){
 			Draw();
-            var hc = HierarchicalController.instance;
-			if (hc != null)
-			    hc.GenerationDone();
-		}
+            if (!undrawn) 
+                generationDone.Invoke();
+        }
         else
         {
 			Debug.Log("Generation failed");
@@ -186,6 +186,8 @@ public class OverlapWFC : BaseWFC{
 	  		model = null;
 	  		return;
 	  	}
+        if (undrawn)
+            return;
         AutoTile();
 		if (postprocessing)
 		    postprocessing.Run(this);
@@ -198,13 +200,10 @@ public class OverlapWFC : BaseWFC{
         {
             for (int x = 0; x < width; x++)
             {
-                if (rendering != null)
-                {
-                    var at = rendering[x, y].GetComponent<Autotilling>();
-
-                    if (at != null)
-                        at.AutoTile(rendering, x, y);
-                }
+                if (rendering[x, y] == null) continue;
+                var at = rendering[x, y].GetComponent<Autotilling>();
+                if (at != null)
+                    at.AutoTile(rendering, x, y);
             }
         }
     }
@@ -228,8 +227,9 @@ public class OverlapWFC : BaseWFC{
                 {
                     for (int j = 0; j < scale; j++)
                     {
-                        var o = rendering[w, h] != null ? Instantiate(rendering[w, h], new Vector3(w * scale + i, h * scale + j, 0),
-                            Quaternion.identity) : null;
+                        var o = rendering[w, h] != null ? 
+                            Instantiate(rendering[w, h], new Vector3(w * scale + i, h * scale + j, 0), Quaternion.identity) 
+                            : null;
                         upscaled[w * scale + i, h * scale + j] = o;
                         o.transform.parent = upGroup;
                     }
@@ -239,6 +239,8 @@ public class OverlapWFC : BaseWFC{
         rendering = upscaled;
         Clear();
         group = upGroup;
+
+        generationDone.Invoke();
     }
 
     public override void AddBlocked(int index)

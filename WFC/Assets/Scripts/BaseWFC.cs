@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 [System.Serializable]
 public class Predetermined
@@ -56,6 +57,8 @@ public class BaseWFC : MonoBehaviour
 
     public bool[,] fill;
 
+    public UnityEvent generationDone = new UnityEvent();
+
 
     public virtual void Generate() { }
 
@@ -71,4 +74,9 @@ public class BaseWFC : MonoBehaviour
     }
 
     public virtual void AddBlocked(int index){}
+
+    private void OnDestroy()
+    {
+        generationDone.RemoveAllListeners();
+    }
 }

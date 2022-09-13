@@ -128,8 +128,10 @@ public abstract class Model
     {
         while (predetermined.Count > 0)
         {
-            var (argmin, r) = predetermined[0];
-            predetermined.RemoveAt(0);
+			// remove from back as it doesn't force moving of all other elements
+            int lastElem = predetermined.Count - 1;
+            var (argmin, r) = predetermined[lastElem];
+            predetermined.RemoveAt(lastElem);
 
             if (sumsOfOnes[argmin] > 1)
             {

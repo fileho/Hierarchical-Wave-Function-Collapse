@@ -27,7 +27,7 @@ public class SimpleTiledWFC : BaseWFC{
 	public Dictionary<string, GameObject> obmap = new Dictionary<string, GameObject>();
     private bool undrawn = true;
 
-	public void DestroyChildren (){
+    public void DestroyChildren (){
 		foreach (Transform child in transform) {
      		GameObject.DestroyImmediate(child.gameObject);
  		}
@@ -49,6 +49,8 @@ public class SimpleTiledWFC : BaseWFC{
 		if (model == null){return;}
         if (undrawn == false) { return; }
         if (model.Run(seed, iterations)){
+            if (!undrawn)
+                generationDone.Invoke();
 			Draw();
 		}
 	}

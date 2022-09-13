@@ -103,7 +103,8 @@ public class TilePainter : MonoBehaviour{
 			tiles = new GameObject("tiles");
 			tiles.transform.parent = this.gameObject.transform;
 			tiles.transform.localPosition = new Vector3();
-		}
+            tiles.AddComponent<Training>();
+        }
 		int cnt = tiles.transform.childCount;
 		List<GameObject> trash = new List<GameObject>();
 		for (int i = 0; i < cnt; i++){
