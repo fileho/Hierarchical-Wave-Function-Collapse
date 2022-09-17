@@ -73,8 +73,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
-  m_Color: {r: 0.7647059, g: 0.71357477, b: 0.02352941, a: 1}
+  m_Sprite: {fileID: 4436705776099222015, guid: 707ed7c2e18df19459d8b74ef0723692, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -118,3 +118,7 @@ MonoBehaviour:
   south: {fileID: 0}
   east: {fileID: 0}
   west: {fileID: 0}
+  northWestDiag: {fileID: 0}
+  northEastDiag: {fileID: 0}
+  southWestDiag: {fileID: 0}
+  southEastDiag: {fileID: 0}

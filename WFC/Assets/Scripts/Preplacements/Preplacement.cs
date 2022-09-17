@@ -11,23 +11,33 @@ public class Preplacement : ScriptableObject
 
     protected void FillEmpty(OverlapWFC wfc)
     {
+        var pattern = CreatePattern(wfc.N);
+
         for (int i = 0; i < wfc.fill.GetLength(1); i++)
         {
             for (int j = 0; j < wfc.fill.GetLength(0); j++)
             { 
-                if (AnyEmpty(wfc.fill, i, j))
-                    wfc.predetermined.Add(new Predetermined(i * wfc.width + j, new byte[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 }));
+                if (AnyEmpty(wfc.fill, i, j, wfc.N))
+                    wfc.predetermined.Add(new Predetermined(i * wfc.width + j, pattern));
             }
         }
     }
 
-    private static bool AnyEmpty(bool[,] fill, int x, int y)
+    private static byte[] CreatePattern(int n)
+    {
+        byte[] pattern = new byte[n * n];
+        for (var i = 0; i < pattern.Length; i++)
+            pattern[i] = 1;
+        return pattern;
+    }
+
+    private static bool AnyEmpty(bool[,] fill, int x, int y, int size)
     {
         int sizeX = fill.GetLength(1);
         int sizeY = fill.GetLength(0);
 
-        // 3 can cause artifacts
-        const int size = 2;
+        // N can cause artifacts
+        size--;
 
         for (int i = 0; i < size; i++)
         {

@@ -206,21 +206,6 @@ public class HierarchicalController : MonoBehaviour
         tiles = new GameObject[r.rendering.GetLength(0), r.rendering.GetLength(1)];
         map.tiles = new GameObject[tiles.GetLength(0), tiles.GetLength(1)];
 
-        // Queue<Layer> queue = new Queue<Layer>();
-        // queue.Enqueue(root[0]);
-        // 
-        // while (queue.Count > 0)
-        // {
-        //     Layer l = queue.Dequeue();
-        //     foreach (var inst in l.instances)
-        //     {
-        //         ExportLayer(map, tiles, inst);
-        //     }
-        // 
-        //     foreach (var c in l.children)
-        //         queue.Enqueue(root[c]);
-        // }
-
         foreach (var layer in layers)
             foreach (var l in layer.layer)
                 foreach (var wfcInstance in l.instances)
