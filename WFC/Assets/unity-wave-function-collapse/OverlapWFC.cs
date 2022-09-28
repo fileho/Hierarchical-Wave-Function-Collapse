@@ -227,11 +227,18 @@ public class OverlapWFC : BaseWFC{
                 {
                     for (int j = 0; j < scale; j++)
                     {
-                        var o = rendering[w, h] != null ? 
-                            Instantiate(rendering[w, h], new Vector3(w * scale + i, h * scale + j, 0), Quaternion.identity) 
-                            : null;
+                        // remap [0,1] -> [-1,1]
+                        Vector2Int offset = new Vector2Int(2 * i - 1, 2 * j - 1);
+
+                        var go = SelectObjectSmoothing(rendering[w,h], w, h, offset);
+                        GameObject o = null;
+                        if (go)
+                        {
+                            o = Instantiate(go, new Vector3(w * scale + i, h * scale + j, 0),
+                                    Quaternion.identity, upGroup);
+                            o.name = go.name;
+                        }
                         upscaled[w * scale + i, h * scale + j] = o;
-                        o.transform.parent = upGroup;
                     }
                 }
             }
@@ -243,10 +250,46 @@ public class OverlapWFC : BaseWFC{
         generationDone.Invoke();
     }
 
+    private GameObject SelectObjectSmoothing(GameObject current, int x, int y, Vector2Int offset)
+    {
+        var d = GetObjectDiagonal(x, y, offset);
+
+        if (!d || !current)
+            return current;
+
+        return d.GetComponent<TileType>().type >= current.GetComponent<TileType>().type ? current : d;
+    }
+
+    private GameObject GetObjectDiagonal(int x, int y, Vector2Int offset)
+    {
+        var go1 = GetObject(x + offset.x, y);
+        var go2 = GetObject(x + offset.x, y + offset.y);
+        var go3 = GetObject(x, y + offset.y);
+
+        if (!go1 || !go2 || !go3)
+            return null;
+
+        var v1 = go1.GetComponent<TileType>().type;
+        var v2 = go2.GetComponent<TileType>().type;
+        var v3 = go3.GetComponent<TileType>().type;
+
+        return v1 == v2 && v2 == v3 ? go2 : null;
+    }
+
+    private GameObject GetObject(int x, int y)
+    {
+        return IsValidPosition(x, y) ? rendering[x, y] : null;
+    }
+
+
+    private bool IsValidPosition(int x, int y)
+    {
+        return x >= 0 && x < width && y >= 0 && y < depth;
+    }
+
     public override void AddBlocked(int index)
     {
 		removed.Add(index);
-    //    predetermined.Add(new Predetermined(index, new byte[]{1,1,1,1,1,1,1,1,1}, true));
     }
 
     private bool[,] GetPreplacement()
