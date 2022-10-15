@@ -91,6 +91,8 @@ public class HierarchicalController : MonoBehaviour
             return;
         }
 
+        DeactivateLayer(generatedLayers - 1);
+
 
         if (generatedLayers < layers.Count) 
             GenerateLayer(generatedLayers);
@@ -163,6 +165,14 @@ public class HierarchicalController : MonoBehaviour
             return;
         }
 
+        foreach (var layer in layers[layerIndex].layer)
+        {
+            foreach (var inst in layer.instances)
+                DestroyObject(inst.gameObject);
+            layer.instances.Clear();
+        }
+
+
         foreach (var prevLayer in layers[layerIndex - 1].layer) 
             GenerateLayer(prevLayer, layers[layerIndex]);
     }
@@ -226,10 +236,20 @@ public class HierarchicalController : MonoBehaviour
                 int y = j + (int)wfc.transform.position.x;
                 DestroyObject(tiles[y,x]);
                 var tile = Instantiate(t, t.transform.position, Quaternion.identity);
+                tile.name = t.name;
                 tile.transform.SetParent(map.transform);
                 tiles[y, x] = tile;
                 map.tiles[y, x] = tile;
             }
+        }
+    }
+
+    private void DeactivateLayer(int index)
+    {
+        var layer = layers[index];
+        foreach (var l in layer.layer)
+        {
+            l.wfc.transform.parent.gameObject.SetActive(false);
         }
     }
 

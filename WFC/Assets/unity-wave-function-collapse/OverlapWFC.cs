@@ -65,7 +65,7 @@ public class OverlapWFC : BaseWFC{
     public override void SetSize(int w, int h, bool[,] fill)
     {
         if (Application.isPlaying)
-            iterations = 200;
+            iterations = 50;
 
         width = w;
         depth = h;

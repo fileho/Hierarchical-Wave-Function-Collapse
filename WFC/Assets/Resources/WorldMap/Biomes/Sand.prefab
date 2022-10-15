@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4696203863842106242}
   - component: {fileID: 7443299580405835508}
   - component: {fileID: -6011781121940241038}
-  - component: {fileID: 2746856727907367079}
   m_Layer: 0
   m_Name: Sand
   m_TagString: Untagged
@@ -97,28 +96,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 2
---- !u!114 &2746856727907367079
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4481095587890603755}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be7ac469b99c2074d90973f34c698e2a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tillingType: 0
-  northWest: {fileID: 0}
-  northEast: {fileID: 0}
-  southWest: {fileID: 0}
-  southEast: {fileID: 0}
-  north: {fileID: 0}
-  south: {fileID: 0}
-  east: {fileID: 0}
-  west: {fileID: 0}
-  northWestDiag: {fileID: 0}
-  northEastDiag: {fileID: 0}
-  southWestDiag: {fileID: 0}
-  southEastDiag: {fileID: 0}
