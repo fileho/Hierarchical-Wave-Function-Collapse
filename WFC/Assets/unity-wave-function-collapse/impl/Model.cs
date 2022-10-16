@@ -126,6 +126,10 @@ public abstract class Model
 
     private bool Predetermined()
     {
+        if (predetermined.Count == 0)
+            return false;
+
+		// collapse all predetermined elements and after it propagate all of them
         while (predetermined.Count > 0)
         {
 			// remove from back as it doesn't force moving of all other elements
@@ -137,11 +141,10 @@ public abstract class Model
             {
                 bool[] w = wave[argmin];
                 for (int t = 0; t < T; t++) if (w[t] != (t == r)) Ban(argmin, t);
-                return true;
             }
 		}
 
-        return false;
+        return true;
     }
 
 	protected void Propagate()
