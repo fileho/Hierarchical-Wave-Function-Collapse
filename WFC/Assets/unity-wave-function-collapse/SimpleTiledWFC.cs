@@ -55,11 +55,12 @@ public class SimpleTiledWFC : BaseWFC{
 		}
 	}
 
-    public override void SetSize(int w, int h, bool[,] fill)
+    public override void SetSize(int w, int h, bool[,] fill, int seed)
     {
         width = w;
         depth = h;
         this.fill = fill;
+        this.seed = seed;
 
 		RunPreplacing();
     }

@@ -62,8 +62,8 @@ public class BaseWFC : MonoBehaviour
 
     public virtual void Generate() { }
 
-    public virtual void SetSize(int w, int h, bool[,] fill) { }
-    public void SetSize(int w, int h) { SetSize(w, h, new bool[0,0]); }
+    public virtual void SetSize(int w, int h, bool[,] fill, int seed = 0) { }
+    public void SetSize(int w, int h, int seed = 0) { SetSize(w, h, new bool[0,0], seed); }
 
     public virtual void Upscale(int scale) {}
 

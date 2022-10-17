@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -33,18 +32,20 @@ public class LayerList
 
     public void ResetLayer()
     {
-        foreach (var wfc in layer) 
+        foreach (var wfc in layer)
             wfc.Reset();
     }
 }
-
 
 [ExecuteInEditMode]
 public class HierarchicalController : MonoBehaviour
 {
     public Vector2Int size = new Vector2Int(40, 30);
+    [SerializeField]
+    private Seed seed;
 
-    [SerializeField] private Postprocessing postprocessing;
+    [SerializeField]
+    private Postprocessing postprocessing;
 
     private int works = 0;
     private int generatedLayers = 0;
@@ -67,15 +68,17 @@ public class HierarchicalController : MonoBehaviour
     private void OnGenerationDone()
     {
         works--;
-        if (works == 0) 
+        if (works == 0)
             UpdateLogic();
     }
 
     // each wfc in one layer is done
     private void UpdateLogic()
     {
+#if UNITY_EDITOR
         if (!EditorApplication.isPlaying)
             return;
+#endif
 
         if (!enableCallbacks)
             return;
@@ -91,23 +94,20 @@ public class HierarchicalController : MonoBehaviour
             return;
         }
 
-        DeactivateLayer(generatedLayers - 1);
-
-
-        if (generatedLayers < layers.Count) 
+        if (generatedLayers < layers.Count)
             GenerateLayer(generatedLayers);
         else
             Debug.Log("GENERATING DONE");
     }
 
-
     private void GenerateTopLayer()
     {
+        seed.Reset();
         generatedLayers = 0;
         works = 0;
         upscaled = false;
 
-        foreach (var layer in layers) 
+        foreach (var layer in layers)
             layer.ResetLayer();
 
         Clear();
@@ -116,17 +116,19 @@ public class HierarchicalController : MonoBehaviour
         SetRootChildren(root);
 
         var top = Instantiate(root.wfc);
-        top.SetSize(size.x,size.y);
+        top.SetSize(size.x, size.y, seed.Next());
         top.transform.position = new Vector3(0, 0, 0) + transform.position;
         WfcGeneration(top, root);
     }
 
     private void SetRootChildren(Layer root)
     {
-        if (layers.Count < 2) return;
+        if (layers.Count < 2)
+            return;
 
-        if (root.children.Count == layers[1].layer.Count) return;
-        
+        if (root.children.Count == layers[1].layer.Count)
+            return;
+
         root.children.Clear();
         for (int i = 0; i < layers[1].layer.Count; i++)
             root.children.Add(i);
@@ -140,16 +142,18 @@ public class HierarchicalController : MonoBehaviour
 
     public void Clear()
     {
-        if (CreateHoldingObject()) return;
+        if (CreateHoldingObject())
+            return;
 
         Transform parent = transform.GetChild(0);
 
-        while (parent.childCount > 0) DestroyObject(parent.GetChild(0).gameObject);
+        while (parent.childCount > 0)
+            DestroyObject(parent.GetChild(0).gameObject);
     }
 
     private bool CreateHoldingObject()
     {
-        if (transform.childCount != 0) 
+        if (transform.childCount != 0)
             return false;
 
         GameObject go = new GameObject("WFCs");
@@ -159,6 +163,8 @@ public class HierarchicalController : MonoBehaviour
 
     public void GenerateLayer(int layerIndex)
     {
+        DeactivateAllLayers();
+        ActivateLayer(layerIndex);
         if (layerIndex == 0)
         {
             GenerateTopLayer();
@@ -172,11 +178,9 @@ public class HierarchicalController : MonoBehaviour
             layer.instances.Clear();
         }
 
-
-        foreach (var prevLayer in layers[layerIndex - 1].layer) 
+        foreach (var prevLayer in layers[layerIndex - 1].layer)
             GenerateLayer(prevLayer, layers[layerIndex]);
     }
-    
 
     private void GenerateLayer(Layer layer, LayerList nextLayer)
     {
@@ -188,7 +192,7 @@ public class HierarchicalController : MonoBehaviour
                 foreach (var l in Utilities.FindAllPatterns(wfcInstance.rendering, secondLayer))
                 {
                     var wfc = Instantiate(secondLayer.wfc);
-                    wfc.SetSize(l.size.y, l.size.x, l.fill);
+                    wfc.SetSize(l.size.y, l.size.x, l.fill, seed.Next());
                     l.FillWfc(wfc);
                     wfc.transform.position = new Vector3(l.min.y, l.min.x, -1) + wfcInstance.transform.position;
                     WfcGeneration(wfc, secondLayer);
@@ -208,7 +212,7 @@ public class HierarchicalController : MonoBehaviour
 
     public void ExportMap()
     {
-        DestroyObject( GameObject.Find("Map"));
+        DestroyObject(GameObject.Find("Map"));
 
         Postprocessing map = Instantiate(postprocessing, Vector3.zero, Quaternion.identity);
         map.gameObject.name = "Map";
@@ -220,7 +224,6 @@ public class HierarchicalController : MonoBehaviour
             foreach (var l in layer.layer)
                 foreach (var wfcInstance in l.instances)
                     ExportLayer(map, tiles, wfcInstance);
-
     }
 
     private static void ExportLayer(Postprocessing map, GameObject[,] tiles, BaseWFC wfc)
@@ -230,11 +233,12 @@ public class HierarchicalController : MonoBehaviour
             for (int j = 0; j < wfc.rendering.GetLength(0); j++)
             {
                 var t = wfc.rendering[j, i];
-                if (t == null) continue;
+                if (t == null)
+                    continue;
 
                 int x = i + (int)wfc.transform.position.y;
                 int y = j + (int)wfc.transform.position.x;
-                DestroyObject(tiles[y,x]);
+                DestroyObject(tiles[y, x]);
                 var tile = Instantiate(t, t.transform.position, Quaternion.identity);
                 tile.name = t.name;
                 tile.transform.SetParent(map.transform);
@@ -244,12 +248,20 @@ public class HierarchicalController : MonoBehaviour
         }
     }
 
-    private void DeactivateLayer(int index)
+    private void ActivateLayer(int index, bool active = true)
     {
         var layer = layers[index];
         foreach (var l in layer.layer)
         {
-            l.wfc.transform.parent.gameObject.SetActive(false);
+            l.wfc.transform.parent.gameObject.SetActive(active);
+        }
+    }
+
+    private void DeactivateAllLayers()
+    {
+        for (int i = 0; i < layers.Count; i++)
+        {
+            ActivateLayer(i, false);
         }
     }
 

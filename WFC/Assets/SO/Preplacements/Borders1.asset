@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: Borders1
   m_EditorClassIdentifier: 
   value: 1
+  fillArea: 0

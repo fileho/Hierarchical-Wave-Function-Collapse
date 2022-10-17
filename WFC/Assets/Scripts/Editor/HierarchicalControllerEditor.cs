@@ -9,12 +9,14 @@ using UnityEditor;
 public class HierarchicalControllerEditor : Editor
 {
     private SerializedProperty size;
+    private SerializedProperty seed;
     private SerializedProperty layers;
     private SerializedProperty postprocessing;
 
     private void OnEnable()
     {
         size = serializedObject.FindProperty("size");
+        seed = serializedObject.FindProperty("seed");
         layers = serializedObject.FindProperty("layers");
         postprocessing = serializedObject.FindProperty("postprocessing");
     }
@@ -26,6 +28,11 @@ public class HierarchicalControllerEditor : Editor
         
 
         EditorGUILayout.PropertyField(size);
+
+        var seedValue = seed.FindPropertyRelative("seed");
+
+        EditorGUILayout.PropertyField(seedValue, new GUIContent("Seed", "0 is random seed"));
+
 
         DrawLayers();
 
