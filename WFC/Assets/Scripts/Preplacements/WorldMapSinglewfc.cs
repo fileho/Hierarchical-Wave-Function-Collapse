@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,18 @@ public class WorldMapSinglewfc : Preplacement
 
         var p = GeneratePattern(3, wfc.N);
         wfc.predetermined.Clear();
+
+        // place water
+        // wfc.predetermined.Add(new Predetermined(wfc.width * wfc.depth / 2, GeneratePattern(1, 3)));
+
+
+        // use village instead of grass
+        // p = new byte[]
+        // {
+        //     3, 3, 3, 
+        //     3, 11, 11,
+        //     3, 11, 11
+        // };
 
         wfc.predetermined.Add(new Predetermined(wfc.width * wfc.depth / 2 + wfc.width / 2, p));
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -57,9 +58,12 @@ public class HierarchicalController : MonoBehaviour
 
     private bool upscaled = false;
 
-    public void StartGenerating()
+    public UnityEvent generationDone = new UnityEvent();
+
+    public void StartGenerating(bool incrementSeed = false)
     {
-        Debug.Log("GENERATING STARTED");
+        if (incrementSeed)
+            seed.IncrementSeed();
         enableCallbacks = true;
         GenerateLayer(0);
     }
@@ -97,7 +101,10 @@ public class HierarchicalController : MonoBehaviour
         if (generatedLayers < layers.Count)
             GenerateLayer(generatedLayers);
         else
-            Debug.Log("GENERATING DONE");
+        {
+            generationDone.Invoke();
+        }
+
     }
 
     private void GenerateTopLayer()
@@ -272,7 +279,7 @@ public class HierarchicalController : MonoBehaviour
 #if UNITY_EDITOR
         DestroyImmediate(o);
 #else
-        Destroy(o);
+        DestroyImmediate(o);
 #endif
     }
 }
