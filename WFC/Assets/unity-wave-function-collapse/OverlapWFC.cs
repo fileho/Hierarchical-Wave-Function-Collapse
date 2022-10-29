@@ -183,8 +183,8 @@ public class OverlapWFC : BaseWFC
         }
         else
         {
-            // Debug.Log("Generation failed");
-            FindObjectOfType<IngameGenerator>().WfcFailure();
+            Debug.Log("Generation failed");
+            //FindObjectOfType<IngameGenerator>().WfcFailure();
             if (seed != 0)
                 ++seed;
             Generate();
