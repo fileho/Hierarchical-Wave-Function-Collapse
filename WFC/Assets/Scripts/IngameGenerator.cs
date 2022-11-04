@@ -20,12 +20,12 @@ public class IngameGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CultureInfo ci = new CultureInfo("en-US");
-        Thread.CurrentThread.CurrentCulture = ci;
-        Thread.CurrentThread.CurrentUICulture = ci;
-
+        // CultureInfo ci = new CultureInfo("en-US");
+        // Thread.CurrentThread.CurrentCulture = ci;
+        // Thread.CurrentThread.CurrentUICulture = ci;
+        // 
         hierarchicalController = FindObjectOfType<HierarchicalController>();
-        hierarchicalController.generationDone.AddListener(OnGenerationDone);
+        // hierarchicalController.generationDone.AddListener(OnGenerationDone);
     }
 
     // Update is called once per frame
@@ -33,7 +33,8 @@ public class IngameGenerator : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.G))
         {
-            GenerateNext();
+            hierarchicalController.StartGenerating();
+            // GenerateNext();
         }
     }
 
