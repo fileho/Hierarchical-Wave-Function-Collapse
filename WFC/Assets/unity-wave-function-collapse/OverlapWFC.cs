@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using hwfc;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -184,7 +185,7 @@ public class OverlapWFC : BaseWFC
         else
         {
             Debug.Log("Generation failed");
-            //FindObjectOfType<IngameGenerator>().WfcFailure();
+            // FindObjectOfType<IngameGenerator>().WfcFailure();
             if (seed != 0)
                 ++seed;
             Generate();

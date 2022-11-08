@@ -2,6 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+namespace hwfc
+{
+/// <summary>
+/// Preplace value tile only to corners. Currently this is unused.
+/// </summary>
+
 [CreateAssetMenu(menuName = "SO/Preplacements/Corners")]
 public class Corners : Preplacement
 {
@@ -24,4 +30,5 @@ public class Corners : Preplacement
         wfc.predetermined = new List<Predetermined> { new Predetermined(wfc.width - 1, pattern),
                                                       new Predetermined(wfc.width * (wfc.depth - 1), pattern) };
     }
+}
 }

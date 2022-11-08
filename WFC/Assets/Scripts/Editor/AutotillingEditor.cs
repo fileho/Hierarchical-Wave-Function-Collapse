@@ -1,8 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
 
+namespace hwfc
+{
+/// <summary>
+/// Shows the auto-tilling tile based on the option for auto-tilling type.
+/// </summary>
 [CustomEditor(typeof(Autotilling))]
 public class AutotillingEditor : Editor
 {
@@ -12,18 +14,21 @@ public class AutotillingEditor : Editor
     private SerializedProperty northWest;
     private SerializedProperty northEast;
     private SerializedProperty southWest;
+
     private SerializedProperty southEast;
+
     // Tiles 8-way
     private SerializedProperty north;
     private SerializedProperty south;
     private SerializedProperty east;
+
     private SerializedProperty west;
+
     // Tiles 12-way
     private SerializedProperty northWestDiag;
     private SerializedProperty northEastDiag;
     private SerializedProperty southWestDiag;
     private SerializedProperty southEastDiag;
-
 
     private void OnEnable()
     {
@@ -76,5 +81,5 @@ public class AutotillingEditor : Editor
 
         serializedObject.ApplyModifiedProperties();
     }
-
+}
 }

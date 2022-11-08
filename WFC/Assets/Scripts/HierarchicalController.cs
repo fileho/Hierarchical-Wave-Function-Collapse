@@ -6,6 +6,14 @@ using UnityEngine.Events;
 using UnityEditor;
 #endif
 
+namespace hwfc
+{
+/// <summary>
+/// Represents a single layer of the HWFC. The TYPE list specified all the values on which we can generate this wfc. The
+/// CHILDREN list holds a list of indices to the next layer. We can run a WFC on top of this one only if it has its
+/// index in that list.
+/// </summary>
+
 [System.Serializable]
 public class Layer
 {
@@ -38,6 +46,10 @@ public class LayerList
     }
 }
 
+/// <summary>
+/// The most important script for the whole HWFC.
+/// </summary>
+
 [ExecuteInEditMode]
 public class HierarchicalController : MonoBehaviour
 {
@@ -64,6 +76,7 @@ public class HierarchicalController : MonoBehaviour
     {
         if (incrementSeed)
             seed.IncrementSeed();
+        DestroyObject(GameObject.Find("Map"));
         enableCallbacks = true;
         GenerateLayer(0);
     }
@@ -102,9 +115,9 @@ public class HierarchicalController : MonoBehaviour
             GenerateLayer(generatedLayers);
         else
         {
+            ExportMap();
             generationDone.Invoke();
         }
-
     }
 
     private void GenerateTopLayer()
@@ -220,6 +233,10 @@ public class HierarchicalController : MonoBehaviour
     public void ExportMap()
     {
         DestroyObject(GameObject.Find("Map"));
+        if (postprocessing == null)
+        {
+            return;
+        }
 
         Postprocessing map = Instantiate(postprocessing, Vector3.zero, Quaternion.identity);
         map.gameObject.name = "Map";
@@ -231,6 +248,9 @@ public class HierarchicalController : MonoBehaviour
             foreach (var l in layer.layer)
                 foreach (var wfcInstance in l.instances)
                     ExportLayer(map, tiles, wfcInstance);
+
+        map.Run();
+        map.transform.position = new Vector3(0, 0, -8);
     }
 
     private static void ExportLayer(Postprocessing map, GameObject[,] tiles, BaseWFC wfc)
@@ -246,7 +266,8 @@ public class HierarchicalController : MonoBehaviour
                 int x = i + (int)wfc.transform.position.y;
                 int y = j + (int)wfc.transform.position.x;
                 DestroyObject(tiles[y, x]);
-                var tile = Instantiate(t, t.transform.position, Quaternion.identity);
+                var pos = new Vector3(t.transform.position.x, t.transform.position.y, 0);
+                var tile = Instantiate(t, pos, Quaternion.identity);
                 tile.name = t.name;
                 tile.transform.SetParent(map.transform);
                 tiles[y, x] = tile;
@@ -282,4 +303,5 @@ public class HierarchicalController : MonoBehaviour
         DestroyImmediate(o);
 #endif
     }
+}
 }

@@ -1,7 +1,11 @@
 using System.Collections.Generic;
+using hwfc;
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// Stores predetermined tiles that will be given to the wfc for an early collapse. 
+/// </summary>
 [System.Serializable]
 public class Predetermined
 {
@@ -16,7 +20,7 @@ public class Predetermined
     }
 
 
-    // transforms tiles from human readable into the wfc format (swapped rows)
+    // Transforms tiles from human readable into the wfc format (swapped rows)
     private byte[] TransformTiles(byte[] t)
     {
         int n = 1;

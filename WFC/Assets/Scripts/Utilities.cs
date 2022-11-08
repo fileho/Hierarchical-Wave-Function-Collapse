@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using hwfc;
 
 public static class Utilities
 {
@@ -26,7 +27,7 @@ public static class Utilities
         return layouts;
     }
 
-    // uses BFS
+    // Uses BFS to track a connected area with specified value of TileType.type
     private static Layout TrackPattern(GameObject[,] rendering, int x, int y, Layer layer)
     {
         Vector2Int pos = new Vector2Int(x, y);

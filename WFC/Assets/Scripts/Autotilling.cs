@@ -3,6 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+namespace hwfc
+{
+/// <summary>
+/// Simple auto-tilling to allow easier specification of the input. Otherwise, much more variety would be required.
+/// </summary>
+
 [RequireComponent(typeof(TileType))]
 [RequireComponent(typeof(SpriteRenderer))]
 public class Autotilling : MonoBehaviour
@@ -14,25 +20,38 @@ public class Autotilling : MonoBehaviour
         TwelveWay
     }
 
-    [SerializeField] private TillingType tillingType;
+    [SerializeField]
+    private TillingType tillingType;
 
     // Tiles 4-way
-    [SerializeField] private Sprite northWest;
-    [SerializeField] private Sprite northEast;
-    [SerializeField] private Sprite southWest;
-    [SerializeField] private Sprite southEast;
+    [SerializeField]
+    private Sprite northWest;
+    [SerializeField]
+    private Sprite northEast;
+    [SerializeField]
+    private Sprite southWest;
+    [SerializeField]
+    private Sprite southEast;
 
     // Tiles 8-way
-    [SerializeField] private Sprite north;
-    [SerializeField] private Sprite south;
-    [SerializeField] private Sprite east;
-    [SerializeField] private Sprite west;
+    [SerializeField]
+    private Sprite north;
+    [SerializeField]
+    private Sprite south;
+    [SerializeField]
+    private Sprite east;
+    [SerializeField]
+    private Sprite west;
 
     // Tiles 12-way
-    [SerializeField] private Sprite northWestDiag;
-    [SerializeField] private Sprite northEastDiag;
-    [SerializeField] private Sprite southWestDiag;
-    [SerializeField] private Sprite southEastDiag;
+    [SerializeField]
+    private Sprite northWestDiag;
+    [SerializeField]
+    private Sprite northEastDiag;
+    [SerializeField]
+    private Sprite southWestDiag;
+    [SerializeField]
+    private Sprite southEastDiag;
 
     private SpriteRenderer spriteRenderer;
     private int tileValue;
@@ -42,13 +61,13 @@ public class Autotilling : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-
     public void AutoTile(GameObject[,] objects, int x, int y)
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         tileValue = GetComponent<TileType>().type;
 
-        if (NotDiagonals(objects, x, y)) return;
+        if (NotDiagonals(objects, x, y))
+            return;
 
         TwelveWay(objects, x, y);
     }
@@ -110,7 +129,7 @@ public class Autotilling : MonoBehaviour
             spriteRenderer.sprite = northWest;
         if (s && e)
             spriteRenderer.sprite = southEast;
-        if (s && w) 
+        if (s && w)
             spriteRenderer.sprite = southWest;
     }
 
@@ -156,4 +175,5 @@ public class Autotilling : MonoBehaviour
     {
         return Convert.ToInt32(b);
     }
+}
 }

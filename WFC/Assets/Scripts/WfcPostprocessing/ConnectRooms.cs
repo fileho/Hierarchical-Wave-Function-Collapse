@@ -1,8 +1,14 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+namespace hwfc
+{
+// A postprocesing that will connect rooms
+// Room is defined as a continues area will TileType.type = 1
+// Used for connecting rooms fo Cave areas in dungeon
+// It avoids areas that will be removed
+// Some room might not be connectable
 [CreateAssetMenu(menuName = "SO/Postprocessing/ConnectRooms")]
 public class ConnectRooms : WfcPostprocessing
 {
@@ -12,44 +18,38 @@ public class ConnectRooms : WfcPostprocessing
     public int pathSize = 2;
 
     private Transform transform;
+    private OverlapWFC wfc;
 
     public override void Run(OverlapWFC wfc)
     {
         tiles = wfc.rendering;
         transform = wfc.transform.GetChild(0).GetChild(0);
+        this.wfc = wfc;
 
         AddPaths();
     }
-    
+
     public void AddPaths()
     {
-        Layer l = new Layer { type = new List<int>() { 2 } };
+        var l = new Layer { type = new List<int> { 2 } };
         var layouts = Utilities.FindAllPatterns(tiles, l);
+        var edges = new List<(int, int)>();
 
-        List<(int, int)> edges = new List<(int, int)>();
-
-
+        // For each room, find a closest room that is not already connected
+        // Drills a path between then if possible
         for (var i = 0; i < layouts.Count; i++)
         {
             var order = FindNearestLayout(layouts, i);
-            foreach (var j in order)
-            {
-                if (!Connected(i, j, edges))
-                {
-                    CreatePath(layouts[i], layouts[j]);
-                    edges.Add((i, j));
-                    break;
-                }
-            }
+            int j = order.Find(j => !Connected(i, j, edges));
+            CreatePath(layouts[i], layouts[j]);
+            edges.Add((i, j));
         }
     }
-
 
     // Checks if those components are connected using bfs
     private static bool Connected(int i, int j, List<(int, int)> edges)
     {
         HashSet<int> visited = new HashSet<int>();
-
         Queue<int> queue = new Queue<int>();
         queue.Enqueue(i);
 
@@ -60,20 +60,19 @@ public class ConnectRooms : WfcPostprocessing
                 return true;
 
             visited.Add(val);
-
             foreach (var (x, y) in edges)
             {
-                if (x == val)
-                    if (!visited.Contains(y))
-                        queue.Enqueue(y);
-                if (y == val)
-                    if (!visited.Contains(x))
-                        queue.Enqueue(x);
+                if (x == val && !visited.Contains(y))
+                    queue.Enqueue(y);
+                if (y == val && !visited.Contains(x))
+                    queue.Enqueue(x);
             }
         }
 
         return false;
     }
+
+    // Finds all different rooms and sorts then by theirs distance
 
     private List<int> FindNearestLayout(List<Layout> layouts, int index)
     {
@@ -84,48 +83,66 @@ public class ConnectRooms : WfcPostprocessing
             if (i != index)
                 indices.Add(i);
 
-        indices.Sort(((i, j) =>
-            (src.Middle() - layouts[i].Middle()).magnitude.CompareTo((src.Middle() - layouts[j].Middle()).magnitude)));
+        // Determined by the distance from middle of rooms
+        indices.Sort(((i, j) => (src.Middle() - layouts[i].Middle())
+                                    .magnitude.CompareTo((src.Middle() - layouts[j].Middle()).magnitude)));
 
         return indices;
     }
 
+    private int PositionIndex(Vector2Int pos)
+    {
+        return pos.y + pos.x * wfc.width;
+    }
+
     private void CreatePath(Layout l1, Layout l2)
     {
-        Vector2Int pos = l1.Middle();
-        var goal = l2.Middle();
+        var pos = l1.NearestPoint(l2);
+        var goal = l2.NearestPoint(l1);
+
+        List<Vector2Int> drillArea = new List<Vector2Int>();
+
+        // Avoid areas that will be later removed
 
         // ReSharper disable once LoopVariableIsNeverChangedInsideLoop
         while (pos != goal)
         {
-            CreatePath(pos.x, pos.y);
-
-            var dir = goal - pos;
-
-            if (dir.x != 0)
+            drillArea.Add(pos);
+            var dir = new Vector2Int(Math.Sign(goal.x - pos.x), Math.Sign(goal.y - pos.y));
+            if (dir.x != 0 && !wfc.IsRemoved(PositionIndex(pos + new Vector2Int(dir.x, -1) * pathSize)) &&
+                !wfc.IsRemoved(PositionIndex(pos + new Vector2Int(dir.x, 1) * pathSize)))
             {
-                pos.x += dir.x / Math.Abs(dir.x);
+                pos.x += dir.x;
                 continue;
             }
 
-            pos.y += dir.y / Math.Abs(dir.y);
+            if (Math.Abs(dir.y) == 0)
+                return;
+            if (wfc.IsRemoved(PositionIndex(pos + new Vector2Int(1, dir.y) * pathSize)) ||
+                wfc.IsRemoved(PositionIndex(pos + new Vector2Int(-1, dir.y) * pathSize)))
+                return;
+            pos.y += dir.y;
+        }
+
+        // Drill the tunnel
+        foreach (var drill in drillArea)
+        {
+            CreatePath(drill.x, drill.y);
         }
     }
 
     private void CreatePath(int x, int y)
     {
-        for (int i = 0; i < pathSize; i++)
-        for (int j = 0; j < pathSize; j++)
-            PlacePath(x - i, y - j);
+        int min = -pathSize / 2;
+        int max = (pathSize + 1) / 2;
 
+        for (int i = min; i < max; i++)
+            for (int j = min; j < max; j++)
+                PlacePath(x - i, y - j);
 
-        PlacePath(x - 1, y);
-        PlacePath(x - 1, y - 1);
-        PlacePath(x, y - 1);
-
-        for (int i = -1; i <= pathSize; i++)
-        for (int j = -1; j <= pathSize; j++)
-            PlaceWalls(x - i, y - j);
+        for (int i = min - 1; i < max + 1; i++)
+            for (int j = min - 1; j < max + 1; j++)
+                PlaceWalls(x - i, y - j);
     }
 
     private void PlaceTile(int x, int y, GameObject tile, Func<int, bool> predicate)
@@ -147,7 +164,6 @@ public class ConnectRooms : WfcPostprocessing
         tiles[y, x] = o;
     }
 
-
     private void PlacePath(int x, int y)
     {
         PlaceTile(x, y, path, v => v != 2);
@@ -157,4 +173,5 @@ public class ConnectRooms : WfcPostprocessing
     {
         PlaceTile(x, y, wall, v => v == 0);
     }
+}
 }

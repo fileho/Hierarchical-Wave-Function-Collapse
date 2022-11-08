@@ -3,24 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-
+namespace hwfc
+{
+// Represent an areas on which we can run another wfc
 public class Layout
 {
     public Vector2Int min;
     public Vector2Int size;
 
-    public readonly bool[,] fill; // true -> place to fill
+    // Bitmap of the size of the whole areas
+    // Important since it allows a pattern of any shape
+    // True -> place to fill
+    public readonly bool[,] fill;
 
     public bool Contains(int x, int y)
     {
         x -= min.x;
         y -= min.y;
 
-        if (x < 0 || x >= size.x || y < 0 || y >= size.y)
-            return false;
-        return fill[y, x];
+        return IsInside(x, y);
     }
 
+    public bool Contains(Vector2Int pos)
+    {
+        return Contains(pos.x, pos.y);
+    }
 
     public Layout(Vector2Int min, Vector2Int max, HashSet<Vector2Int> tracked)
     {
@@ -55,10 +62,40 @@ public class Layout
         return min + size / 2;
     }
 
+    // Heuristic used for drill paths between two room
+    // It returns some close point, not necessary the closest - it would make the tunnel look artificial
     public Vector2Int NearestPoint(Layout other)
     {
-        int x = min.x > other.min.x ? min.x + 1 : Math.Min(min.x + size.x - 2, other.min.x + 1);
-        int y = min.y > other.min.y ? min.y + 1 : Math.Min(min.y + size.y - 2, other.min.y + 1);
-        return new Vector2Int(x, y);
+        int x = min.x > other.min.x ? min.x + 3 : Math.Min(min.x + size.x - 3, other.min.x + 3);
+        int y = min.y > other.min.y ? min.y + 3 : Math.Min(min.y + size.y - 3, other.min.y + 3);
+
+        var pos = new Vector2Int(x, y);
+        if (Contains(pos))
+            return pos;
+
+        // Look into all directions until an inside point is not found
+        Vector2Int[] offsets = { new Vector2Int(1, 1),   new Vector2Int(1, -1), new Vector2Int(-1, 1),
+                                 new Vector2Int(-1, -1), Vector2Int.right,      Vector2Int.down,
+                                 Vector2Int.up,          Vector2Int.left };
+        int distance = 1;
+        while (true)
+        {
+            foreach (var o in offsets)
+            {
+                var p = pos + o * distance;
+                if (Contains(p))
+                    return p;
+            }
+
+            ++distance;
+        }
     }
+
+    private bool IsInside(int x, int y)
+    {
+        if (x < 0 || x >= size.x || y < 0 || y >= size.y)
+            return false;
+        return fill[y, x];
+    }
+}
 }

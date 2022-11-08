@@ -3,6 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+namespace hwfc
+{
+/// <summary>
+/// Used for the abstract layer in the dungeon. Places a boss room close to the edge. It forces the dungeon to always
+/// have a boss room.
+/// </summary>
+
 [CreateAssetMenu(menuName = "SO/Preplacements/DungeonLayout")]
 public class DungeonLayout : Preplacement
 {
@@ -13,12 +20,12 @@ public class DungeonLayout : Preplacement
 
         wfc.predetermined = new List<Predetermined>(1);
 
-        // pick a pseudo-random number according to a seed
-        // with a fixed seed, we need to generate the same layout every time
+        // Pick a pseudo-random number according to a seed
+        // With a fixed seed, we need to generate the same layout every time
         var r = wfc.seed == 0 ? new System.Random() : new System.Random(wfc.seed);
 
-        int x = r.Next(wfc.width / 5);
-        int y = r.Next(wfc.depth / 5);
+        int x = r.Next(wfc.width / 8);
+        int y = r.Next(wfc.depth / 8);
 
         var p = BossRoomCorner();
         wfc.predetermined.Add(new Predetermined(x + wfc.width * y, p));
@@ -26,15 +33,11 @@ public class DungeonLayout : Preplacement
 
     private byte[] BossRoomCorner()
     {
-        // the corner of the boss room
-        // contains tile indices
-        var ret = new byte[] 
-        { 
-            5, 9, 10,
-            5, 9, 9,
-            5, 5, 5 
-        };
+        // The corner of the boss room
+        // Contains tile indices
+        var ret = new byte[] { 5, 9, 10, 5, 9, 9, 5, 5, 5 };
 
         return ret;
     }
+}
 }

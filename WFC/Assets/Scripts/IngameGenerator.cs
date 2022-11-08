@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
+using hwfc;
 
 public class IngameGenerator : MonoBehaviour
 {
