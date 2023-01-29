@@ -13,7 +13,7 @@ public class RemoveSmallRooms : WfcPostprocessing
     {
         const int minSize = 4;
 
-        Layer l = new Layer { type = new List<int>() { 1, 2 } };
+        WFCData l = new WFCData { type = new List<int>() { 1, 2 } };
         var layouts = Utilities.FindAllPatterns(wfc.rendering, l);
 
         foreach (var layout in layouts)

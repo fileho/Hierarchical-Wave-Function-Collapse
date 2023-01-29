@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using hwfc;
 
+namespace hwfc
+{
 public static class Utilities
 {
-    public static List<Layout> FindAllPatterns(GameObject[,] rendering, Layer layer)
+    public static List<Layout> FindAllPatterns(GameObject[,] rendering, WFCData wfcData)
     {
         List<Layout> layouts = new List<Layout>();
 
@@ -14,13 +15,14 @@ public static class Utilities
         {
             for (int j = 0; j < rendering.GetLength(0); j++)
             {
-                if (!layer.Contains(rendering[j, i])) continue;
+                if (!wfcData.Contains(rendering[j, i]))
+                    continue;
 
                 if (layouts.Any(layout => layout.Contains(i, j)))
                     continue;
 
                 // ADD new layout
-                layouts.Add(TrackPattern(rendering, i, j, layer));
+                layouts.Add(TrackPattern(rendering, i, j, wfcData));
             }
         }
 
@@ -28,7 +30,7 @@ public static class Utilities
     }
 
     // Uses BFS to track a connected area with specified value of TileType.type
-    private static Layout TrackPattern(GameObject[,] rendering, int x, int y, Layer layer)
+    private static Layout TrackPattern(GameObject[,] rendering, int x, int y, WFCData wfcData)
     {
         Vector2Int pos = new Vector2Int(x, y);
         int width = rendering.GetLength(1);
@@ -38,7 +40,7 @@ public static class Utilities
         Vector2Int max = pos;
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
         queue.Enqueue(pos);
-        
+
         while (queue.Count > 0)
         {
             pos = queue.Dequeue();
@@ -46,7 +48,7 @@ public static class Utilities
                 continue;
             if (!IsValid(pos.x, width) || !IsValid(pos.y, height))
                 continue;
-            if (!layer.Contains(rendering[pos.y, pos.x]))
+            if (!wfcData.Contains(rendering[pos.y, pos.x]))
                 continue;
 
             min = Vector2Int.Min(min, pos);
@@ -69,9 +71,9 @@ public static class Utilities
         }
     }
 
-
     public static bool IsValid(int value, int max)
     {
         return value >= 0 && value < max;
     }
+}
 }

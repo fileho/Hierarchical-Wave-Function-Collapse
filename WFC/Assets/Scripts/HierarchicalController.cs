@@ -9,13 +9,13 @@ using UnityEditor;
 namespace hwfc
 {
 /// <summary>
-/// Represents a single layer of the HWFC. The TYPE list specified all the values on which we can generate this wfc. The
-/// CHILDREN list holds a list of indices to the next layer. We can run a WFC on top of this one only if it has its
-/// index in that list.
+/// Represents a single wfc and its properties for the HWFC. The TYPE list specified all the values on which we can
+/// generate this wfc. The CHILDREN list holds a list of indices to the next layer. We can run a WFC on top of this one
+/// only if it has its index in that list.
 /// </summary>
 
 [System.Serializable]
-public class Layer
+public class WFCData
 {
     public BaseWFC wfc;
     public List<int> type;
@@ -35,9 +35,9 @@ public class Layer
 }
 
 [System.Serializable]
-public class LayerList
+public class Layer
 {
-    public List<Layer> layer;
+    public List<WFCData> layer;
 
     public void ResetLayer()
     {
@@ -65,7 +65,7 @@ public class HierarchicalController : MonoBehaviour
 
     private GameObject[,] tiles;
 
-    public List<LayerList> layers;
+    public List<Layer> layers;
     private bool enableCallbacks = false;
 
     private bool upscaled = false;
@@ -99,7 +99,6 @@ public class HierarchicalController : MonoBehaviour
 
         if (!enableCallbacks)
             return;
-
         ++generatedLayers;
 
         if (generatedLayers == 1 && !upscaled)
@@ -118,6 +117,11 @@ public class HierarchicalController : MonoBehaviour
             ExportMap();
             generationDone.Invoke();
         }
+    }
+
+    public void SetSeed(int value)
+    {
+        seed.SetSeed(value);
     }
 
     private void GenerateTopLayer()
@@ -141,7 +145,7 @@ public class HierarchicalController : MonoBehaviour
         WfcGeneration(top, root);
     }
 
-    private void SetRootChildren(Layer root)
+    private void SetRootChildren(WFCData root)
     {
         if (layers.Count < 2)
             return;
@@ -202,11 +206,11 @@ public class HierarchicalController : MonoBehaviour
             GenerateLayer(prevLayer, layers[layerIndex]);
     }
 
-    private void GenerateLayer(Layer layer, LayerList nextLayer)
+    private void GenerateLayer(WFCData wfcData, Layer nextLayer)
     {
-        foreach (var wfcInstance in layer.instances)
+        foreach (var wfcInstance in wfcData.instances)
         {
-            foreach (var val in layer.children)
+            foreach (var val in wfcData.children)
             {
                 var secondLayer = nextLayer.layer[val];
                 foreach (var l in Utilities.FindAllPatterns(wfcInstance.rendering, secondLayer))
@@ -221,13 +225,13 @@ public class HierarchicalController : MonoBehaviour
         }
     }
 
-    private void WfcGeneration(BaseWFC wfc, Layer layer)
+    private void WfcGeneration(BaseWFC wfc, WFCData wfcData)
     {
         ++works;
         wfc.generationDone.AddListener(OnGenerationDone);
         wfc.Generate();
         wfc.transform.parent = transform.GetChild(0);
-        layer.instances.Add(wfc);
+        wfcData.instances.Add(wfc);
     }
 
     public void ExportMap()
@@ -281,7 +285,8 @@ public class HierarchicalController : MonoBehaviour
         var layer = layers[index];
         foreach (var l in layer.layer)
         {
-            l.wfc.transform.parent.gameObject.SetActive(active);
+            if (l.wfc.transform.parent != null)
+                l.wfc.transform.parent.gameObject.SetActive(active);
         }
     }
 

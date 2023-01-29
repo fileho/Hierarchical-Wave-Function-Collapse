@@ -24,7 +24,7 @@ public class AddPathsPostprocessing : Postprocessing
 
     public void AddPaths()
     {
-        var l = new Layer { type = new List<int> { 2 } };
+        var l = new WFCData { type = new List<int> { 2 } };
         var layouts = Utilities.FindAllPatterns(tiles, l);
         var edges = new List<(int, int)>();
 

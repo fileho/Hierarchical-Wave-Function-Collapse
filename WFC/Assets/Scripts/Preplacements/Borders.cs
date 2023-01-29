@@ -33,7 +33,7 @@ public class Borders : Preplacement
         for (int i = 0; i < n * n; i++)
             pattern[i] = value;
         Fill(wfc, pattern);
-        FillEmpty(wfc);
+        FillEmpty(wfc, value);
     }
 
     public override void Run(SimpleTiledWFC wfc)

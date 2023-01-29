@@ -9,7 +9,7 @@ using UnityEditor;
 [ExecuteInEditMode]
 public class OverlapWFC : BaseWFC
 {
-    public Training training = null;
+    public Training training;
     public int gridsize = 1;
     public int seed = 0;
     public int N = 3;
@@ -105,12 +105,6 @@ public class OverlapWFC : BaseWFC
         {
             Debug.Log("Can't Generate: no designated Training component");
         }
-        // if (IsPrefabRef(training.gameObject))
-        //{
-        //     FindObjectOfType<UnityEngine.UI.Text>().text = "...";
-        //	GameObject o = CreatePrefab(training.gameObject, new Vector3(0,99999f,0f), Quaternion.identity);
-        //	training = o.GetComponent<Training>();
-        // }
         if (training.sample == null)
         {
             training.Compile();
@@ -185,7 +179,6 @@ public class OverlapWFC : BaseWFC
         else
         {
             Debug.Log("Generation failed");
-            // FindObjectOfType<IngameGenerator>().WfcFailure();
             if (seed != 0)
                 ++seed;
             Generate();
@@ -219,7 +212,7 @@ public class OverlapWFC : BaseWFC
                     if (IsRemoved(y * width + x))
                         continue;
 
-                    int v = (int)model.Sample(x, y);
+                    int v = model.Sample(x, y);
                     if (v != 99 && v < training.tiles.Length)
                     {
                         Vector3 pos = new Vector3(x * gridsize, y * gridsize, 0f);
@@ -227,7 +220,7 @@ public class OverlapWFC : BaseWFC
                         GameObject fab = training.tiles[v] as GameObject;
                         if (fab != null)
                         {
-                            GameObject tile = (GameObject)Instantiate(fab, new Vector3(), Quaternion.identity);
+                            GameObject tile = Instantiate(fab, new Vector3(), Quaternion.identity);
                             Vector3 fscale = tile.transform.localScale;
                             tile.transform.parent = @group;
                             tile.transform.localPosition = pos;

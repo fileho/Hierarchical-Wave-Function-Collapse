@@ -34,5 +34,11 @@ public class Seed
         ++seed;
         currentValue = seed;
     }
+
+    public void SetSeed(int value)
+    {
+        seed = value;
+        Reset();
+    }
 }
 }

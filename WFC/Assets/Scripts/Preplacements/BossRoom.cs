@@ -13,7 +13,12 @@ public class BossRoom : Preplacement
 {
     public override void Run(OverlapWFC wfc)
     {
-        wfc.predetermined = new List<Predetermined>(2);
+        wfc.predetermined = new List<Predetermined>();
+
+        const int minSize = 8;
+        // Room is too small
+        if (wfc.width < minSize || wfc.depth < minSize)
+            return;
 
         // Wall tiles outside, ground inside
         byte[] bottom = { 3, 3, 3, 2, 2, 2, 1, 1, 1 };

@@ -10,7 +10,7 @@ public class IngameGenerator : MonoBehaviour
 {
     private HierarchicalController hierarchicalController;
 
-    private const int limit = 100;
+    private const int limit = 1;
     private int generatedCount;
     private float time;
     private int fails;
@@ -24,7 +24,7 @@ public class IngameGenerator : MonoBehaviour
         // CultureInfo ci = new CultureInfo("en-US");
         // Thread.CurrentThread.CurrentCulture = ci;
         // Thread.CurrentThread.CurrentUICulture = ci;
-        // 
+        //
         hierarchicalController = FindObjectOfType<HierarchicalController>();
         // hierarchicalController.generationDone.AddListener(OnGenerationDone);
     }
