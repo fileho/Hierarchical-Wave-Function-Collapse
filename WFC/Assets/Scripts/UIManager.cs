@@ -1,6 +1,7 @@
 using System;
 using hwfc;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -19,10 +20,14 @@ public class UIManager : MonoBehaviour
         hierarchicalController.StartGenerating();
     }
 
+    public void Menu()
+    {
+        SceneManager.LoadScene(0);
+    }
+
     private int GetSeed()
     {
         Int32.TryParse(inputField.text, out int result);
-        Debug.Log(result);
         return result;
     }
 }

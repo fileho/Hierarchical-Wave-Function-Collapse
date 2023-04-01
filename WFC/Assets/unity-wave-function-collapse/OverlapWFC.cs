@@ -76,7 +76,7 @@ public class OverlapWFC : BaseWFC
     public override void SetSize(int w, int h, bool[,] fill, int seed)
     {
         if (Application.isPlaying)
-            iterations = 50;
+            iterations = 10;
 
         width = w;
         depth = h;
@@ -172,9 +172,21 @@ public class OverlapWFC : BaseWFC
         }
         if (model.Run(seed, iterations))
         {
-            Draw();
-            if (!undrawn)
-                generationDone.Invoke();
+            foreach (var index in model.last)
+            {
+                DrawTile(index);
+            }
+            if (model.last.Count != 0)
+            {
+                return;
+            }
+
+            AutoTile();
+            if (postprocessing)
+                postprocessing.Run(this);
+
+            generationDone.Invoke();
+            undrawn = false;
         }
         else
         {
@@ -190,57 +202,75 @@ public class OverlapWFC : BaseWFC
         return rendering[x, y];
     }
 
+    private void DrawTile(int index)
+    {
+        int x = index % width;
+        int y = index / width;
+
+        if (rendering[x, y] != null || IsRemoved(y * width + x))
+            return;
+
+        int v = model.Sample(x, y);
+        if (v != 99 && v < training.tiles.Length)
+        {
+            Vector3 pos = new Vector3(x * gridsize, y * gridsize, 0f);
+            int rot = (int)training.RS[v];
+            GameObject fab = training.tiles[v] as GameObject;
+            if (fab != null)
+            {
+                GameObject tile = Instantiate(fab, new Vector3(), Quaternion.identity);
+                Vector3 fscale = tile.transform.localScale;
+                tile.transform.parent = @group;
+                tile.transform.localPosition = pos;
+                tile.transform.localEulerAngles = new Vector3(0, 0, 360 - (rot * 90));
+                tile.transform.localScale = fscale;
+                rendering[x, y] = tile;
+            }
+        }
+    }
+
     public void Draw()
     {
-        if (output == null)
+        if (output == null || group == null)
         {
             return;
         }
-        if (group == null)
-        {
-            return;
-        }
-        undrawn = false;
-        try
-        {
-            for (int y = 0; y < depth; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    if (rendering[x, y] != null)
-                        continue;
-                    if (IsRemoved(y * width + x))
-                        continue;
 
-                    int v = model.Sample(x, y);
-                    if (v != 99 && v < training.tiles.Length)
+        undrawn = false;
+
+        for (int y = 0; y < depth; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (rendering[x, y] != null)
+                    continue;
+                if (IsRemoved(y * width + x))
+                    continue;
+
+                int v = model.Sample(x, y);
+                if (v != 99 && v < training.tiles.Length)
+                {
+                    Vector3 pos = new Vector3(x * gridsize, y * gridsize, 0f);
+                    int rot = (int)training.RS[v];
+                    GameObject fab = training.tiles[v] as GameObject;
+                    if (fab != null)
                     {
-                        Vector3 pos = new Vector3(x * gridsize, y * gridsize, 0f);
-                        int rot = (int)training.RS[v];
-                        GameObject fab = training.tiles[v] as GameObject;
-                        if (fab != null)
-                        {
-                            GameObject tile = Instantiate(fab, new Vector3(), Quaternion.identity);
-                            Vector3 fscale = tile.transform.localScale;
-                            tile.transform.parent = @group;
-                            tile.transform.localPosition = pos;
-                            tile.transform.localEulerAngles = new Vector3(0, 0, 360 - (rot * 90));
-                            tile.transform.localScale = fscale;
-                            rendering[x, y] = tile;
-                        }
+                        GameObject tile = Instantiate(fab, new Vector3(), Quaternion.identity);
+                        Vector3 fscale = tile.transform.localScale;
+                        tile.transform.parent = @group;
+                        tile.transform.localPosition = pos;
+                        tile.transform.localEulerAngles = new Vector3(0, 0, 360 - (rot * 90));
+                        tile.transform.localScale = fscale;
+                        rendering[x, y] = tile;
                     }
-                    else
-                    {
-                        undrawn = true;
-                    }
+                }
+                else
+                {
+                    undrawn = true;
                 }
             }
         }
-        catch (IndexOutOfRangeException)
-        {
-            model = null;
-            return;
-        }
+
         if (undrawn)
             return;
         AutoTile();

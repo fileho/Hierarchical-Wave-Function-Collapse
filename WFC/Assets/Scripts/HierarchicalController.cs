@@ -228,10 +228,10 @@ public class HierarchicalController : MonoBehaviour
     private void WfcGeneration(BaseWFC wfc, WFCData wfcData)
     {
         ++works;
+        wfcData.instances.Add(wfc);
         wfc.generationDone.AddListener(OnGenerationDone);
         wfc.Generate();
         wfc.transform.parent = transform.GetChild(0);
-        wfcData.instances.Add(wfc);
     }
 
     public void ExportMap()
