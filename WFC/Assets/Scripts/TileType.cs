@@ -9,7 +9,6 @@ namespace hwfc
 /// is required if we want to run any WFC over this tile. Should be added directly to each tile prefab used in the
 /// generation.
 /// </summary>
-
 public class TileType : MonoBehaviour
 {
     public int type;

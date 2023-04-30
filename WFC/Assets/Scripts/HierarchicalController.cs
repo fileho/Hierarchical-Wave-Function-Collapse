@@ -49,7 +49,6 @@ public class Layer
 /// <summary>
 /// The most important script for the whole HWFC.
 /// </summary>
-
 [ExecuteInEditMode]
 public class HierarchicalController : MonoBehaviour
 {
@@ -59,15 +58,12 @@ public class HierarchicalController : MonoBehaviour
 
     [SerializeField]
     private Postprocessing postprocessing;
+    public List<Layer> layers;
 
     private int works = 0;
     private int generatedLayers = 0;
-
     private GameObject[,] tiles;
-
-    public List<Layer> layers;
     private bool enableCallbacks = false;
-
     private bool upscaled = false;
 
     public UnityEvent generationDone = new UnityEvent();

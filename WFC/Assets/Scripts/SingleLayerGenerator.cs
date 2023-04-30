@@ -5,11 +5,15 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Works the same way as IngameGenerator but for single-layer WFC for comparisons
+/// </summary>
 public class SingleLayerGenerator : MonoBehaviour
 {
     private OverlapWFC wfc;
 
-    [SerializeField] private int limit = 100;
+    [SerializeField]
+    private int limit = 100;
     private int generatedCount;
     private float time;
     private float timeSinceFail;
@@ -24,7 +28,7 @@ public class SingleLayerGenerator : MonoBehaviour
         Thread.CurrentThread.CurrentCulture = ci;
         Thread.CurrentThread.CurrentUICulture = ci;
         text = FindObjectOfType<Text>();
-        
+
         wfc = FindObjectOfType<OverlapWFC>();
         wfc.generationDone.AddListener(OnGenerationDone);
     }

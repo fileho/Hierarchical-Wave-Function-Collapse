@@ -7,8 +7,10 @@ using UnityEditor;
 
 namespace hwfc
 {
-// A postprocessing that will add paths at the end
-// Used for the dungeon
+/// <summary>
+/// A postprocessing that will add paths at the end
+/// Used for the dungeon
+/// </summary>
 public class AddPathsPostprocessing : Postprocessing
 {
     public GameObject path;
@@ -67,6 +69,12 @@ public class AddPathsPostprocessing : Postprocessing
         }
     }
 
+    /// <summary>
+    /// Finds nearest layout to an input layout using distance from a middle metric
+    /// </summary>
+    /// <param name="layouts">all layouts</param>
+    /// <param name="index">index of the input layout</param>
+    /// <returns></returns>
     private List<int> FindNearestLayout(List<Layout> layouts, int index)
     {
         Layout src = layouts[index];

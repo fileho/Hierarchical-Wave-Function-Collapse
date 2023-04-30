@@ -39,19 +39,27 @@ public class SimpleTiledWFC : BaseWFC
     {
         if (incremental)
         {
-            //	Run();
+            Run();
         }
     }
 
-    // public void Run(){
-    // 	if (model == null){return;}
-    //     if (undrawn == false) { return; }
-    //     if (model.Run(seed, iterations)){
-    //         if (!undrawn)
-    //             generationDone.Invoke();
-    // 		Draw();
-    // 	}
-    // }
+    public void Run()
+    {
+        if (model == null)
+        {
+            return;
+        }
+        if (undrawn == false)
+        {
+            return;
+        }
+        if (model.Run(seed, iterations))
+        {
+            if (!undrawn)
+                generationDone.Invoke();
+            Draw();
+        }
+    }
 
     public override void SetSize(int w, int h, bool[,] fill, int seed)
     {

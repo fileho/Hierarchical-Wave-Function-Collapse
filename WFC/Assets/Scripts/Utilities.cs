@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace hwfc
 {
+/// <summary>
+/// Utilities like the BFS algorithm that are used on multiple places
+/// </summary>
 public static class Utilities
 {
     public static List<Layout> FindAllPatterns(GameObject[,] rendering, WFCData wfcData)

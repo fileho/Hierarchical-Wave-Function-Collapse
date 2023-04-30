@@ -5,6 +5,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+/// <summary>
+/// Guides the generation from the UI
+/// </summary>
 public class UIManager : MonoBehaviour
 {
     [SerializeField]

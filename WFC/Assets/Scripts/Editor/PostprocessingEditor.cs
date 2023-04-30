@@ -3,7 +3,9 @@ using UnityEngine;
 
 namespace hwfc
 {
-
+/// <summary>
+/// Simple editor that allows us to run the final postprocessing on an exported map
+/// </summary>
 [CustomEditor(typeof(Postprocessing))]
 public class PostprocessingEditor : Editor
 {

@@ -6,36 +6,39 @@ using UnityEngine;
 using UnityEngine.UI;
 using hwfc;
 
+/// <summary>
+/// Used for benchmarking and generating many outputs at once
+/// </summary>
 public class IngameGenerator : MonoBehaviour
 {
     private HierarchicalController hierarchicalController;
 
-    private const int limit = 1;
+    private const int limit = 100;
     private int generatedCount;
     private float time;
     private int fails;
 
+    // Status of the generation
     [SerializeField]
     private Text text;
 
-    // Start is called before the first frame update
     void Start()
     {
-        // CultureInfo ci = new CultureInfo("en-US");
-        // Thread.CurrentThread.CurrentCulture = ci;
-        // Thread.CurrentThread.CurrentUICulture = ci;
-        //
+        CultureInfo ci = new CultureInfo("en-US");
+        Thread.CurrentThread.CurrentCulture = ci;
+        Thread.CurrentThread.CurrentUICulture = ci;
+
         hierarchicalController = FindObjectOfType<HierarchicalController>();
-        // hierarchicalController.generationDone.AddListener(OnGenerationDone);
+        hierarchicalController.generationDone.AddListener(OnGenerationDone);
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Start the generation
         if (Input.GetKeyDown(KeyCode.G))
         {
-            hierarchicalController.StartGenerating();
-            // GenerateNext();
+            GenerateNext();
         }
     }
 
@@ -59,6 +62,9 @@ public class IngameGenerator : MonoBehaviour
         fails = 0;
     }
 
+    /// <summary>
+    /// Need to set this callback in the OverlapWFC
+    /// </summary>
     public void WfcFailure()
     {
         ++fails;

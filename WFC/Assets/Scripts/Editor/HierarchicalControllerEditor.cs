@@ -35,12 +35,8 @@ public class HierarchicalControllerEditor : Editor
         // Not the whole Seed class
         var seedValue = seed.FindPropertyRelative("seed");
         EditorGUILayout.PropertyField(seedValue, new GUIContent("Seed", "0 is random seed"));
-
         DrawLayers();
-
         EditorGUILayout.PropertyField(postprocessing);
-
-        // DrawDefaultInspector();
 
         serializedObject.ApplyModifiedProperties();
     }

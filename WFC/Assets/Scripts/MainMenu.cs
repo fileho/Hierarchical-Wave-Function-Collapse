@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Main menu UI
+/// </summary>
 public class MainMenu : MonoBehaviour
 {
     public void LoadWorldMap()
