@@ -1,5 +1,6 @@
 using System;
 using hwfc;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -7,7 +8,7 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     [SerializeField]
-    private InputField inputField;
+    private TMP_InputField inputField;
     [SerializeField]
     private Button butGenerate;
 
